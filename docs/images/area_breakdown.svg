@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 330" font-family="Helvetica,Arial,sans-serif">
+  <rect x="0" y="0" width="1180" height="330" fill="#ffffff"/>
+  <text x="590" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a2733">Area composition — 4.524 mm² die vs the 3 mm² charter cap</text>
+  <text x="590" y="52" text-anchor="middle" font-size="12.5" fill="#5a6a7a">Instance area 3.455 mm² (77% util) · the four over-cap causes are quantified in reports/FINAL_METRICS.md §2</text>
+
+  <!-- scale: 0..4.8 mm² -> x 220..1100 (183.33 px/mm²) -->
+  <!-- die stacked bar -->
+  <text x="210" y="112" text-anchor="end" font-size="13" font-weight="bold" fill="#1a2733">die 4.524 mm²</text>
+  <rect x="220" y="92" width="397" height="44" fill="#7fb3d5" stroke="#2a5a8c"/>
+  <rect x="617" y="92" width="236" height="44" fill="#8fce9f" stroke="#2e7d4f"/>
+  <rect x="853" y="92" width="197" height="44" fill="#d9dde3" stroke="#8a8a8a" stroke-dasharray="4 3"/>
+  <text x="418" y="119" text-anchor="middle" font-size="13" font-weight="bold" fill="#123">SRAM macros 2.166</text>
+  <text x="735" y="119" text-anchor="middle" font-size="13" font-weight="bold" fill="#123">std cells 1.283</text>
+  <text x="951" y="106" text-anchor="middle" font-size="11.5" fill="#445">die overhead</text>
+  <text x="951" y="122" text-anchor="middle" font-size="11.5" fill="#445">1.069 (no pad-ring</text>
+  <text x="951" y="136" text-anchor="middle" font-size="11.5" fill="#445">band reserved)</text>
+
+  <!-- instance bar -->
+  <text x="210" y="186" text-anchor="end" font-size="13" font-weight="bold" fill="#1a2733">instances 3.455 mm²</text>
+  <rect x="220" y="166" width="397" height="36" fill="#a9cde8" stroke="#2a5a8c"/>
+  <rect x="617" y="166" width="236" height="36" fill="#b5dfc0" stroke="#2e7d4f"/>
+  <text x="418" y="189" text-anchor="middle" font-size="12.5" fill="#123">3 × sky130_sram_1rw1r_128x256_8 — 62.7%</text>
+  <text x="735" y="189" text-anchor="middle" font-size="12.5" fill="#123">logic 37.3% (326,270 cells)</text>
+
+  <!-- cap marker -->
+  <line x1="770" y1="70" x2="770" y2="220" stroke="#c0392b" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="770" y="62" text-anchor="middle" font-size="13" font-weight="bold" fill="#c0392b">charter cap 3.0 mm²</text>
+  <text x="770" y="240" text-anchor="middle" font-size="12" fill="#c0392b">die = 151% of cap (+1.524 mm²); instances = 115%</text>
+
+  <!-- P4A0 flop comparison -->
+  <text x="210" y="286" text-anchor="end" font-size="12.5" fill="#1a2733">pre-macro baseline (flop storage)</text>
+  <rect x="220" y="272" width="855" height="22" fill="#e8d9c5" stroke="#a08850"/>
+  <text x="647" y="288" text-anchor="middle" font-size="12" fill="#554">4.658 mm² instances — macro-ization saved 1.2 mm² and validated the direction</text>
+
+  <!-- axis -->
+  <line x1="220" y1="240" x2="1100" y2="240" stroke="#666"/>
+  <g font-size="11" fill="#666">
+    <text x="220" y="256" text-anchor="middle">0</text>
+    <text x="403" y="256" text-anchor="middle">1.0</text>
+    <text x="587" y="256" text-anchor="middle">2.0</text>
+    <text x="770" y="256" text-anchor="middle">3.0</text>
+    <text x="953" y="256" text-anchor="middle">4.0</text>
+    <text x="1100" y="256" text-anchor="middle">4.8 mm²</text>
+  </g>
+</svg>

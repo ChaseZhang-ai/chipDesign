@@ -1,49 +1,40 @@
 # AME-Chip — An AI-Decode Accelerator Chip, Designed End-to-End by AI Agents
 
-**A complete RTL-to-GDS tapeout candidate for a transformer decode-stage accelerator, produced by a multi-session AI agent flow on a fully open-source toolchain (OpenROAD / Yosys / KLayout / OpenRAM, SkyWater sky130hd PDK).**
+<p align="center">
+  <img src="docs/images/die_shot_full.png" alt="AME-Chip die shot (sky130hd, 4.524 mm²)" width="900"/>
+</p>
 
-Final deliverable: **GDS + gate-level-verified netlist, signed off at 94.78 MHz, with the on-chip decode pipeline proven bit-exact against a golden reference from silicon RTL down to the synthesized gates.**
+**The die shot above is real silicon layout** — three SRAM macros (bottom row) and ~326k standard cells, from the final GDS of a transformer decode-stage accelerator taken through RTL → synthesis → place & route → signoff entirely by orchestrated AI-agent sessions on a 100% open-source toolchain (Yosys / OpenROAD / KLayout / OpenRAM, SkyWater sky130hd).
+
+**Final deliverable: a tapeout-candidate GDS, signed off at 94.78 MHz, with the on-chip decode pipeline proven bit-exact from RTL down to the synthesized gates.**
 
 ---
 
-## Headline Results (signoff basis)
+## Headline Results
 
 | Metric | Value | Evidence |
 |---|---|---|
-| Signoff frequency | **94.78 MHz** (10.551 ns, WNS +0.40 / TNS 0 / 0 violations) | `reports/en/P4B3_REPORT.md` |
-| Measured fmax (capability) | 98.52 MHz (10.150 ns, zero margin) | `reports/en/P4B3_REPORT.md` |
-| 100 MHz sprint | 7 endpoints short (−0.55 ns, single path family) — archived for v2 | `reports/P4A3_REPORT.md` |
-| Area | 3.449 mm² instances / 4.524 mm² die (77% util) | `reports/en/FINAL_METRICS.md` |
-| Power | 241.8 mW (signoff activity); IR drop < 0.5 mV | `reports/en/FINAL_METRICS.md` |
-| Decode throughput | **15.3 tokens/s** @94.78 MHz; 15.76 mJ per token | `reports/en/FINAL_METRICS.md` |
-| Functional proof | End-to-end decode: 3/3 tokens bit-exact RTL↔golden; gate-level: 46-byte output **md5-identical to RTL, cycle-count identical** | `reports/en/P4B3_REPORT.md` |
-| Signoff checklist | **PASS 34 / FAIL 0 / NA 7** | `reports/en/TAPEOUT_CHECKLIST.md` |
+| Signoff frequency | **94.78 MHz** (10.551 ns, WNS +0.40 / TNS 0 / 0 violations) | [SIGNOFF_REPORT](reports/SIGNOFF_REPORT.md) |
+| Measured fmax (capability) | 98.52 MHz (10.150 ns, zero margin) | [SIGNOFF_REPORT](reports/SIGNOFF_REPORT.md) |
+| Area | 3.449 mm² instances / 4.524 mm² die (77% util) | [FINAL_METRICS](reports/FINAL_METRICS.md) |
+| Power | 241.8 mW; IR drop < 0.5 mV | [FINAL_METRICS](reports/FINAL_METRICS.md) |
+| Decode throughput | **15.3 tokens/s**; 15.76 mJ per token | [FINAL_METRICS](reports/FINAL_METRICS.md) |
+| Functional proof | 3/3 decode tokens bit-exact RTL↔golden; gate-level output **md5-identical to RTL, cycle-identical** | [SIGNOFF_REPORT](reports/SIGNOFF_REPORT.md) |
+| Signoff checklist | **PASS 34 / FAIL 0 / NA 7** | [TAPEOUT_CHECKLIST](reports/TAPEOUT_CHECKLIST.md) |
 
-**What "bit-exact" means here:** a 2-layer miniGPT decode step (all 25 GEMV layers, INT8 quantized, 1.97 M MACs per step) runs through the real CPU + custom matrix engine + DMA + KV-cache controller, and the emitted token IDs match a floating-point golden reference exactly — first in RTL simulation, then again on the synthesized gate-level netlist.
+## What the Chip Is
 
-## What Was Built
+![AME-Chip architecture](docs/images/architecture.svg)
 
-```
-                        ┌──────────────────────────────────────────────┐
-   XMEM (off-chip) ◄────┤  AME-Chip (sky130hd, 4.5 mm² die)            │
-   weights / KV blob    │                                              │
-        │               │  ┌────────┐   ┌─────────────────────────┐    │
-        ▼               │  │ RV32IM │◄──┤  AME: INT8 matrix engine │    │
-  ┌───────────┐         │  │ 5-stage│   │  16 MAC lanes × K time-  │    │
-  │  DMA 2D   │────────►│  │ core   │   │  sharing, requant unit   │    │
-  │  engine   │         │  └───┬────┘   └─────────────────────────┘    │
-  └─────┬─────┘         │      │ AXI-Lite xbar (4 masters/9 slaves)    │
-        ▼               │  ┌───▼──────┐  ┌──────────┐  ┌───────────┐  │
-  weight tiles ────────►│  │ OC SRAM  │  │ KV cache │  │ UART/INTC │  │
-  235 MB/s stream       │  │ 4 KB     │  │ ctrl 2-bk│  │ CSR       │  │
-                        │  └──────────┘  └──────────┘  └───────────┘  │
-                        └──────────────────────────────────────────────┘
-```
+A 2-layer miniGPT decode step (all 25 GEMV layers, INT8, 1.97 M MACs) runs on-chip: the RV32IM core only orchestrates — every tensor operation goes to the **AME** custom INT8 matrix engine (16 MAC lanes × K-dim time-sharing, INT32 saturating accumulate, per-channel requant). Weights (≈2.1 MB) stream from off-chip through a 2D DMA at 235 MB/s; a dedicated KV-cache controller with a custom TRANSPOSE/SLICE datapath serves attention. The architecture deliberately rejects a wide systolic array: batch-1 decode is bandwidth-bound, and the adjudicated design (ARCH_SPEC §9.2) spends area on streaming, not on idle multipliers.
 
-- **AME (AI Matrix Extension)** — the custom co-processor: 16 independent INT8 MAC lanes with K-dimension time sharing (16 MAC/cycle), INT32 saturating accumulation, per-channel fixed-point requant. Batch-1 decode is GEMV-dominated and bandwidth-limited; the adjudicated architecture spends area on bandwidth streams, not on a wide systolic array (see `docs/en/` and `docs/ARCH_SPEC.md` §9.2).
-- **RV32IM core** — in-house 5-stage pipeline, custom-0 opcode coprocessor interface for AME, designed for control flow only.
-- **Storage subsystem** — AXI-Lite crossbar, 2D DMA engine (235 MB/s weight streaming, meets the architecture bandwidth budget), KV-cache controller with a custom TRANSPOSE/SLICE datapath for attention P·V.
-- **Toolchain** — 100% open source: Yosys + OpenROAD-flow-scripts + KLayout + OpenRAM macros, SkyWater sky130hd PDK. No commercial EDA was used at any step.
+## Results in Context
+
+![Area breakdown](docs/images/area_breakdown.svg)
+
+![Throughput in context](docs/images/throughput_context.svg)
+
+Function is fully proven. Against the charter's two stretch goals the report is honest: throughput is 16% of the bandwidth-wall prediction — the gap is per-tile CPU control and DMA waits (AME duty 4.1%), a software/scheduling lever, not the clock; and the die is 151% of the 3 mm² charter cap, with all four over-cap causes quantified. Both are v2 roadmap items with the sprint data already archived (100 MHz missed by 7 endpoints on one path family).
 
 ## Repository Layout
 
@@ -51,17 +42,14 @@ Final deliverable: **GDS + gate-level-verified netlist, signed off at 94.78 MHz,
 ├── README.md                 ← you are here
 ├── rtl/                      ← RTL v0.3 (frozen): cpu/ ame/ mem/ soc/ interfaces/ + package
 ├── tb/                       ← verification: unit TBs per module + integration + gate-level
-│   ├── cpu/  ame/  mem/      ← module-level TBs (all green, see reports/P3*)
+│   ├── cpu/  ame/  mem/      ← module-level TBs (all green)
 │   ├── soc/                  ← SoC smoke + full-chip e2e (3/3 tokens bit-exact)
 │   ├── integ/                ← CPU×AME instruction-level co-simulation
 │   └── gate/                 ← gate-level signoff TBs, LVS/STA scripts, probes
-├── syn/amechip/              ← ORFS flow assets: config, SDC, macro wrappers, guards
+├── syn/amechip/              ← ORFS flow assets: config, SDC, macro wrappers, guard rails
 ├── pnr/amechip/results/.../p4a4fix/   ← FINAL DELIVERABLES (see below)
-├── docs/                     ← architecture spec, ISA, golden spec, final report
-│   └── en/                   ← English translations of the final report
-├── reports/                  ← per-session reports (P0…P5) + final metrics/bugs
-│   └── en/                   ← English: metrics, bugs, tapeout checklist, signoff reports
-├── (models/ — miniGPT + INT8 golden dataset — regenerated by scripts/gld_gen.py, kept out of the snapshot)
+├── docs/                     ← final report (English), process summary, images
+├── reports/                  ← FINAL_METRICS / FINAL_BUGS / TAPEOUT_CHECKLIST / SIGNOFF_REPORT
 └── scripts/                  ← 30+ tools: assembler, ISS, golden verify, release_check.sh
 ```
 
@@ -77,30 +65,36 @@ Final deliverable: **GDS + gate-level-verified netlist, signed off at 94.78 MHz,
 
 `scripts/release_check.sh` regenerates everything from RTL: `--quick` (lint + fast sims + STA chain, ~35 s) up to `--full` (synthesis → P&R → DRC → gate sims).
 
-## Signoff Status — What Is Proven, What Is Carried
+## Signoff Status — Proven vs Carried
 
 **Proven (FAIL=0 on the tapeout checklist):** static timing (setup/hold, independently recomputed), routing DRC = 0, KLayout DRC (macro-external) = 0, IR drop < 0.5 mV, power, gate-level functional equivalence (byte-exact, cycle-exact), SRAM-macro binding verified bit-by-bit (1263/1263, with negative controls), pin-level LVS in three layers.
 
-**Known limitations (all documented, none blocking the functional claim):**
-1. **Single-corner (TT) signoff** — the SRAM macro lib ships one PVT corner only; multi-corner needs macro regeneration (v2).
-2. **Gate sims use a +XINIT basis** — root-caused to X-pessimism from reset-less queue slots (a discriminating experiment proved silicon-invisible); formal equivalence stopped at macro black boxes (v2: hierarchical equivalence or slot resets).
-3. **LVS is pin-level, three-layer** — full-flatten extraction did not converge in 4.5 h (v2: stronger machine/strategy).
+**Known limitations (documented, none blocking the functional claim):** single-corner (TT) signoff — the SRAM macro lib ships one PVT corner; gate sims use a +XINIT basis — root-caused to X-pessimism from reset-less queue slots, with a discriminating experiment proving silicon-invisibility; formal equivalence stopped at macro black boxes; LVS is pin-level rather than full-flatten. All four are v2 items with defined fixes.
 
-## How It Was Built — the Short Version
+## How It Was Built
 
-The whole flow was executed by **19 orchestrated AI-agent sessions** in 10 waves: workload profiling → architecture/ISA contract → 5-way parallel RTL → 4-way verification → contract patch waves → backend (twice) → signoff (three rounds). A frozen contract (`docs/ARCH_SPEC.md`, `docs/AME_ISA.md`, `docs/GOLDEN_SPEC.md`) let parallel sessions work independently; every dispute was routed to an adjudication log instead of silent fixes. See **`docs/PROCESS.md`** for the method and the full lesson list — including two tapeout-class bugs the AI signoff chain caught in its own backend (a boot-ROM regression and an OpenROAD `read_verilog` bus-ordering defect that silently reversed every SRAM macro connection).
+![Agent flow](docs/images/agent_flow.svg)
+
+Nineteen orchestrated AI-agent sessions in 10 waves. A frozen contract set (`ARCH_SPEC` / `AME_ISA` / `GOLDEN_SPEC`) let five RTL sessions run in parallel without negotiating with each other; a 74-case bit-exact golden dataset made every "correct" claim checkable by a session that did not write the code; and every dispute went to an adjudication log (adjudications A–N) instead of a silent fix. The signoff chain caught two tapeout-class bugs in its own backend — a boot-ROM regression and an OpenROAD `read_verilog` bus-ordering defect that silently reversed every SRAM macro connection — see **[docs/PROCESS.md](docs/PROCESS.md)** for the full method and lesson list.
 
 ## Documentation Index
 
-**English (leadership/reviewer-facing):** `docs/en/FINAL_REPORT.md`, `reports/en/FINAL_METRICS.md`, `reports/en/FINAL_BUGS.md`, `reports/en/TAPEOUT_CHECKLIST.md`, `reports/en/P4B3_REPORT.md`, `docs/PROCESS.md`
+| Document | What it covers |
+|---|---|
+| [docs/FINAL_REPORT.md](docs/FINAL_REPORT.md) | Final report: executive summary, metrics, attainment analysis, v2 roadmap |
+| [docs/PROCESS.md](docs/PROCESS.md) | The agent-driven method, wave history, lessons |
+| [reports/FINAL_METRICS.md](reports/FINAL_METRICS.md) | Every signoff number with its source report |
+| [reports/FINAL_BUGS.md](reports/FINAL_BUGS.md) | Complete defect ledger — 100+ items, all dispositioned |
+| [reports/TAPEOUT_CHECKLIST.md](reports/TAPEOUT_CHECKLIST.md) | The signoff checklist (PASS 34 / FAIL 0 / NA 7) |
+| [reports/SIGNOFF_REPORT.md](reports/SIGNOFF_REPORT.md) | Gate-level signoff round: root causes, evidence chains |
 
-**Chinese originals (complete working record):** `docs/FINAL_REPORT.md`, `docs/ARCH_SPEC.md`, `docs/AME_ISA.md`, `docs/GOLDEN_SPEC.md`, `docs/CONTRACT_PATCH_LOG.md`, `reports/P*.md` (per-session). The architecture spec is the single source of truth for the design; the contract patch log records every adjudication with rationale.
+Per-session working records (architecture spec, ISA, golden spec, contract patch log) are maintained in the internal archive.
 
 ## v2 Roadmap (from measured data, not guesses)
 
-1. **100 MHz** — 7 endpoints short on one path family (`y1_q→p_u_q`); sprint archived in P4A3.
-2. **Area convergence** — die is 151% of the 3 mm² charter cap; four quantified causes in `reports/en/FINAL_METRICS.md`.
+1. **100 MHz** — 7 endpoints short on one path family (`y1_q→p_u_q`); sprint archived.
+2. **Area convergence** — die is 151% of the charter cap; four quantified causes.
 3. **Multi-corner PVT** — regenerate SRAM macro libs; rerun the scripted flow.
-4. **Throughput** — AME duty is 4.1%: the bottleneck is per-tile CPU control, not the engine. Prefill mode, 32×32 array, and kernel scheduling are the levers.
+4. **Throughput** — prefill mode, kernel scheduling, 32×32 array option.
 5. **Formal equivalence** (hierarchical), full-flatten LVS, injection-class gate regressions.
-6. **Upstream report** — OpenSTA `read_verilog` concatenation-ordering defect (found, root-caused, and worked around here).
+6. **Upstream report** — OpenSTA `read_verilog` concatenation-ordering defect (found, root-caused, worked around here).

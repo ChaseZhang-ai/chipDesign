@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 400" font-family="Helvetica,Arial,sans-serif">
+  <rect x="0" y="0" width="1180" height="400" fill="#ffffff"/>
+  <text x="590" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a2733">Decode throughput — measured vs the theoretical ladder (log scale)</text>
+  <text x="590" y="52" text-anchor="middle" font-size="12.5" fill="#5a6a7a">tokens/s · the gap to the bandwidth wall is the v2 lever (kernel scheduling, prefill mode), not the clock</text>
+
+  <!-- log scale: 10..20000 tok/s -> x 260..1120 ; px = 260 + 860*log10(v/10)/log10(2000) -->
+  <!-- values: 15625->1091, 130->550, 119->540, 19.4->335, 15.3->314 ; gridlines at 10/100/1000/10000: 260/520/780/1040 -->
+
+  <g stroke="#d0d5da">
+    <line x1="260" y1="70" x2="260" y2="330"/>
+    <line x1="520" y1="70" x2="520" y2="330"/>
+    <line x1="780" y1="70" x2="780" y2="330"/>
+    <line x1="1040" y1="70" x2="1040" y2="330"/>
+  </g>
+  <g font-size="11" fill="#889">
+    <text x="260" y="348" text-anchor="middle">10</text>
+    <text x="520" y="348" text-anchor="middle">100</text>
+    <text x="780" y="348" text-anchor="middle">1,000</text>
+    <text x="1040" y="348" text-anchor="middle">10,000</text>
+    <text x="590" y="372" text-anchor="middle" font-size="12" fill="#667">tokens per second (log scale)</text>
+  </g>
+
+  <!-- roofline premise (rejected) -->
+  <text x="252" y="88" text-anchor="end" font-size="12.5" fill="#1a2733">roofline compute ceiling — 15,625 tok/s</text>
+  <rect x="260" y="72" width="831" height="26" fill="#e3c8cf" stroke="#a05a68"/>
+  <text x="1085" y="90" text-anchor="end" font-size="11.5" fill="#7a3a48">premise rejected at contract stage: needs 1.9 MiB on-chip weights (≥390 mm²)</text>
+
+  <!-- datapath floor -->
+  <text x="252" y="143" text-anchor="end" font-size="12.5" fill="#1a2733">pure-datapath floor — ≈130 tok/s</text>
+  <rect x="260" y="127" width="290" height="26" fill="#cfe0f0" stroke="#2a5a8c"/>
+  <text x="558" y="145" font-size="11.5" fill="#2a5a8c">weight stream time only</text>
+
+  <!-- bandwidth wall -->
+  <text x="252" y="198" text-anchor="end" font-size="12.5" fill="#1a2733">bandwidth wall — ≈119 tok/s</text>
+  <rect x="260" y="182" width="280" height="26" fill="#8fbde0" stroke="#1a6faf"/>
+  <text x="548" y="200" font-size="11.5" fill="#123">XMEM 16-bit streaming bound (batch-1 physics)</text>
+
+  <!-- measured @120 -->
+  <text x="252" y="253" text-anchor="end" font-size="12.5" font-weight="bold" fill="#1a2733">measured (120 MHz sim basis) — 19.4 tok/s</text>
+  <rect x="260" y="237" width="75" height="26" fill="#2e8b57"/>
+  <text x="343" y="255" font-size="11.5" fill="#2e8b57">6.7× above the datapath floor</text>
+
+  <!-- signoff @94.78 -->
+  <text x="252" y="308" text-anchor="end" font-size="12.5" font-weight="bold" fill="#1a2733">signoff delivery (94.78 MHz) — 15.3 tok/s</text>
+  <rect x="260" y="292" width="54" height="26" fill="#1c4f30"/>
+  <text x="322" y="310" font-size="11.5" fill="#1c4f30">15.9 tok/s at fmax 98.52</text>
+
+  <!-- annotation -->
+  <text x="640" y="290" font-size="12" fill="#555">gap cause: per-tile CPU control + DMA waits</text>
+  <text x="640" y="308" font-size="12" fill="#555">(AME duty 4.1%) — software/scheduling lever, v2 ④</text>
+</svg>

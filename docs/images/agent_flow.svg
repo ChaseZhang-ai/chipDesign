@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 500" font-family="Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#456"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1180" height="500" fill="#ffffff"/>
+  <text x="590" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a2733">How it was built — 19 orchestrated AI-agent sessions in 10 waves</text>
+  <text x="590" y="52" text-anchor="middle" font-size="12.5" fill="#5a6a7a">contract-first parallelism · every dispute adjudicated and logged · verification always by a session that did not write the RTL</text>
+
+  <!-- W0 -->
+  <rect x="30" y="80" width="150" height="60" rx="8" fill="#ece4f4" stroke="#6a4a9c" stroke-width="1.5"/>
+  <text x="105" y="104" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#3d2a63">W0 · environment</text>
+  <text x="105" y="122" text-anchor="middle" font-size="11" fill="#445">OpenROAD built, gcd green</text>
+  <line x1="180" y1="110" x2="216" y2="110" stroke="#456" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- W1 -->
+  <rect x="220" y="80" width="330" height="60" rx="8" fill="#dbe9f7" stroke="#2a5a8c" stroke-width="1.5"/>
+  <text x="385" y="100" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#1a3a5c">W1 · profile ∥ contract  (2 parallel)</text>
+  <text x="385" y="120" text-anchor="middle" font-size="11" fill="#345">1.97 M MACs/step profile → frozen ARCH_SPEC + AME_ISA + GOLDEN_SPEC</text>
+  <line x1="550" y1="110" x2="586" y2="110" stroke="#456" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- W2 -->
+  <rect x="590" y="70" width="560" height="80" rx="8" fill="#d8ecdd" stroke="#2e7d4f" stroke-width="1.5"/>
+  <text x="870" y="92" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#1c4f30">W2 · five-way parallel RTL  (CPU ∥ AME ∥ memory ∥ SoC top ∥ golden dataset)</text>
+  <text x="870" y="112" text-anchor="middle" font-size="11" fill="#345">all modules delivered with green unit TBs · 74-case bit-exact golden released · 30+ defects fixed in-module</text>
+  <text x="870" y="132" text-anchor="middle" font-size="11" fill="#567">contract let all five sessions work simultaneously without stepping on each other</text>
+  <line x1="870" y1="150" x2="870" y2="180" stroke="#456" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- W3 -->
+  <rect x="590" y="184" width="560" height="80" rx="8" fill="#fdf1e0" stroke="#c77d1f" stroke-width="1.5"/>
+  <text x="870" y="206" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#7a4d0f">W3 · four-way verification (independent sessions)</text>
+  <text x="870" y="226" text-anchor="middle" font-size="11" fill="#544">AME 74/74 bit-exact · CPU 6,946 random instrs 0 mismatch · memory 46,935,355 checks · e2e 3/3 tokens bit-exact</text>
+  <text x="870" y="246" text-anchor="middle" font-size="11" fill="#567">escalated 2 tapeout-class flow bugs + 4 RTL blockers instead of fixing silently</text>
+  <line x1="590" y1="224" x2="480" y2="250" stroke="#456" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- patch waves -->
+  <rect x="300" y="252" width="180" height="76" rx="8" fill="#f7dede" stroke="#b04a5a" stroke-width="1.5"/>
+  <text x="390" y="274" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#6d2530">W3.5/W4.9 · patches</text>
+  <text x="390" y="292" text-anchor="middle" font-size="11" fill="#544">adjudications A–N logged</text>
+  <text x="390" y="310" text-anchor="middle" font-size="11" fill="#544">RTL v0.2 → v0.3, contract v2</text>
+  <line x1="480" y1="288" x2="586" y2="288" stroke="#456" stroke-width="2" marker-end="url(#fa)"/>
+
+  <!-- W4 -->
+  <rect x="590" y="284" width="560" height="76" rx="8" fill="#dbe9f7" stroke="#2a5a8c" stroke-width="1.5"/>
+  <text x="870" y="306" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#1a3a5c">W4/W4.5/W4.75/W4.9 · backend + signoff (four rounds)</text>
+  <text x="870" y="326" text-anchor="middle" font-size="11" fill="#345">GDS · two tapeout-class flow bugs caught &amp; fixed by the AI signoff chain (boot-ROM regression,</text>
+  <text x="870" y="344" text-anchor="middle" font-size="11" fill="#345">OpenROAD bus-ordering defect) · 82.69 → 94.78 MHz with a bounded-chase adjudication</text>
+
+  <!-- outcomes right column -->
+  <rect x="30" y="184" width="330" height="76" rx="8" fill="#e2f2e6" stroke="#2e7d4f" stroke-width="2"/>
+  <text x="195" y="208" text-anchor="middle" font-size="13" font-weight="bold" fill="#1c4f30">Functional proof</text>
+  <text x="195" y="228" text-anchor="middle" font-size="11.5" fill="#234">RTL: 3/3 tokens bit-exact vs FP golden (18.6 M cycles)</text>
+  <text x="195" y="246" text-anchor="middle" font-size="11.5" fill="#234">Gate-level: 46-byte output md5-identical, cycle-exact</text>
+
+  <rect x="30" y="360" width="1120" height="110" rx="8" fill="#f4f7fa" stroke="#8aa" stroke-width="1.5"/>
+  <text x="590" y="386" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a2733">Why it worked</text>
+  <text x="590" y="408" text-anchor="middle" font-size="12" fill="#345">Frozen contracts let sessions run in parallel — 5 RTL authors never negotiated with each other, only with the spec</text>
+  <text x="590" y="428" text-anchor="middle" font-size="12" fill="#345">A bit-exact golden dataset (74 cases / 5.2 M MACs) made every "correct" claim checkable by a session that did not write the code</text>
+  <text x="590" y="448" text-anchor="middle" font-size="12" fill="#345">Bounded-chase adjudications stopped endless optimization: three backend rounds, then sign off at whatever the process achieved</text>
+</svg>
