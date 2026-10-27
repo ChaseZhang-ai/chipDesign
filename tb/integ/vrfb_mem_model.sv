@@ -19,7 +19,7 @@ module vrfb_mem_model (
   input  logic [31:0] f_wdata,
   input  logic [3:0]  f_wstrb,
   output logic [31:0] f_rdata,
-  output logic [1:0]  f_resp          // 0=OKAY 1=SLVERR 2=DECERR(仅编码用)
+  output logic [1:0]  f_resp
 );
 
   localparam int SRAM_WORDS = 1024;
@@ -52,7 +52,7 @@ module vrfb_mem_model (
   wire [8:0]  rw       = a[10:2];
   wire [1:0]  blane    = a[1:0];
 
-  logic [31:0] wv;   // 字节写在时钟块内做(见下)
+  logic [31:0] wv;
 
   wire        f_in_rom = (f_addr >= amechip_pkg::A_BOOTROM_BASE) && (f_addr <= amechip_pkg::A_BOOTROM_END);
   wire        f_in_sram = (f_addr <= amechip_pkg::A_OCSRAM_END);
@@ -103,10 +103,10 @@ module vrfb_mem_model (
           rsp_r_q <= amechip_pkg::AXI_OKAY;
           rsp_d_q <= rom[rw];
         end else if (in_rom) begin
-          rsp_r_q <= amechip_pkg::AXI_SLVERR;   // ROM 写
+          rsp_r_q <= amechip_pkg::AXI_SLVERR;
           rsp_d_q <= 32'd0;
         end else begin
-          rsp_r_q <= amechip_pkg::AXI_DECERR;   // 保留区
+          rsp_r_q <= amechip_pkg::AXI_DECERR;
           rsp_d_q <= 32'd0;
         end
       end

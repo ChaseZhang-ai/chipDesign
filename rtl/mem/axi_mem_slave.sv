@@ -3,7 +3,7 @@
 `endif
 
 module axi_mem_slave #(
-  parameter int unsigned DEPTH     = 1024,  // 32-bit 字数
+  parameter int unsigned DEPTH     = 1024,
   parameter              INIT_FILE = "",
   parameter bit          IS_ROM    = 1'b0
 ) (
@@ -50,9 +50,9 @@ module axi_mem_slave #(
     end
   end
 
-  assign b_valid_o = wr_busy; // 接受拍提交,下一拍 B
+  assign b_valid_o = wr_busy;
 
-  logic rd_pend_q; // 1 = RAM 读已发出,R 待交付
+  logic rd_pend_q;
 
   wire rd_accept = ar_valid_i && !rd_pend_q && !wr_accept && !wr_busy;
 

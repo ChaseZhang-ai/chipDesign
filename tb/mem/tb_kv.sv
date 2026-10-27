@@ -336,7 +336,7 @@ module tb_kv;
         rbw      = cmds[c*16 + 9];
         if ((w0 === 32'hx) || (mode > 3'd5)) begin
           if (w0 === 32'hx || w0 === 32'h0) begin
-            if (c > 0) c = ncmd; // 结束
+            if (c > 0) c = ncmd;
           end
         end else begin
           nops_run = nops_run + 1;

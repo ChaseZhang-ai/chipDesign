@@ -23,7 +23,7 @@ interface axi_lite_if (
   logic                 r_valid;
   logic                 r_ready;
 
-  modport master (  // 发起方(CPU / DMA_RD / DMA_WR / KV)
+  modport master (
     output aw, aw_valid,  input aw_ready,
     output w,  w_valid,   input w_ready,
     input  b,  b_valid,   output b_ready,
@@ -32,7 +32,7 @@ interface axi_lite_if (
     input  clk, rst_n
   );
 
-  modport slave (   // 响应方(xbar 从端口 / 各外设)
+  modport slave (
     input  aw, aw_valid,  output aw_ready,
     input  w,  w_valid,   output w_ready,
     output b,  b_valid,   input  b_ready,
@@ -41,7 +41,7 @@ interface axi_lite_if (
     input  clk, rst_n
   );
 
-  modport monitor ( // TB/断言用
+  modport monitor (
     input aw, aw_valid, aw_ready,
     input w,  w_valid,  w_ready,
     input b,  b_valid,  b_ready,

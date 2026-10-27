@@ -5,8 +5,8 @@
 package amechip_pkg;
 
   localparam int unsigned XLEN     = 32;  // RV32
-  localparam int unsigned AXI_AW   = 32;  // AXI4-Lite 地址宽
-  localparam int unsigned AXI_DW   = 32;  // AXI4-Lite 数据宽
+  localparam int unsigned AXI_AW   = 32;
+  localparam int unsigned AXI_DW   = 32;
   localparam int unsigned AXI_STRB = AXI_DW/8;
 
   typedef logic [XLEN-1:0]     xlen_t;
@@ -36,30 +36,30 @@ package amechip_pkg;
 
   localparam int unsigned CFG_N_EFF_OFF = 0;  // imm[4:0]
   localparam int unsigned CFG_KT_OFF    = 5;  // imm[9:5]
-  localparam int unsigned CFG_RSVD_OFF  = 10; // imm[11:10] 必须 00
+  localparam int unsigned CFG_RSVD_OFF  = 10;
   localparam int unsigned QCFG_S_OFF    = 0;  // rs2[5:0]
-  localparam int unsigned QCFG_S_W      = 6;  // 1..63(GOLDEN 禁止 0)
+  localparam int unsigned QCFG_S_W      = 6;
   localparam int unsigned QCFG_ROUND_OFF = 6; // rs2[6]
-  localparam int unsigned RQ_M_W        = 32; // 无符号乘数(int64 语义乘法)
-  localparam int unsigned RQ_ENTRIES    = 32; // per-channel 参数表项数
+  localparam int unsigned RQ_M_W        = 32;
+  localparam int unsigned RQ_ENTRIES    = 32;
   localparam int unsigned LDW_REGION_OFF = 0; // rs1[1:0] WBUF region
   localparam int unsigned LDW_REGION_W   = 2;
-  localparam int unsigned LDW_TSEL_OFF   = 2; // rs1[2] tile 组
-  localparam int unsigned LDX_OFF_OFF   = 0;  // rs1[8:0] XBUF 字节偏移
+  localparam int unsigned LDW_TSEL_OFF   = 2;
+  localparam int unsigned LDX_OFF_OFF   = 0;
   localparam int unsigned LDX_OFF_W     = 9;
-  localparam int unsigned LDX_XSEL_OFF  = 9;  // rs1[9] x 组
+  localparam int unsigned LDX_XSEL_OFF  = 9;
   localparam int unsigned EXE_TSEL_OFF  = 0;  // rs1[0]
-  localparam int unsigned ST_IDX_OFF    = 0;  // rs1[4:0] Y 索引
+  localparam int unsigned ST_IDX_OFF    = 0;
   localparam int unsigned ST_IDX_W      = 5;
 
-  localparam int unsigned AME_M_DEF     = 16; // K-tile 深度
-  localparam int unsigned AME_N_DEF     = 16; // 并行输出路数(MAC lane)
-  localparam int unsigned AME_TSETS     = 2;  // tile/x 寄存器组(固定)
+  localparam int unsigned AME_M_DEF     = 16;
+  localparam int unsigned AME_N_DEF     = 16;
+  localparam int unsigned AME_TSETS     = 2;
   localparam int unsigned WBUF_TILES    = 4;
   localparam int unsigned WBUF_DEPTH    = WBUF_TILES * AME_M_DEF * AME_N_DEF; // 1024 B
   localparam int unsigned XBUF_DEPTH    = 1024;                               // B
 
-  localparam int unsigned RQ_S_MIN      = 1;  // S ≥ 1(S=0 被拒绝)
+  localparam int unsigned RQ_S_MIN      = 1;
 
   localparam logic [31:0] A_OCSRAM_BASE  = 32'h0000_0000; // @MAP:OCSRAM_BASE
   localparam logic [31:0] A_OCSRAM_END   = 32'h0000_0FFF; // @MAP:OCSRAM_END
@@ -153,7 +153,7 @@ package amechip_pkg;
   localparam logic [31:0] DMA_DPITCH_OFF   = 32'h14;
   localparam logic [31:0] DMA_CTRL_OFF     = 32'h18;
   localparam logic [31:0] DMA_STATUS_OFF   = 32'h1C;
-  localparam int unsigned DMA_FIFO_DEPTH = 8; // 每通道最小 FIFO 字数
+  localparam int unsigned DMA_FIFO_DEPTH = 8;
   typedef enum logic [3:0] {
     DMA_ERR_NONE   = 4'd0,
     DMA_ERR_ALIGN  = 4'd1,
@@ -170,7 +170,7 @@ package amechip_pkg;
   localparam logic [31:0] KV_DST_OFF    = 32'h18;
   localparam logic [31:0] KV_PITCH_OFF  = 32'h1C;
   localparam logic [31:0] KV_STATUS_OFF = 32'h20;
-  localparam logic [31:0] KV_SLICE_OFF  = 32'h24; // [5:0] DDOFF [11:6] DLEN(0=64);P1BX-A 裁决 C
+  localparam logic [31:0] KV_SLICE_OFF  = 32'h24;
   typedef enum logic [2:0] {
     KV_MODE_APPEND_K  = 3'd0,
     KV_MODE_APPEND_V  = 3'd1,
@@ -186,9 +186,9 @@ package amechip_pkg;
     KV_ERR_ABORT = 4'd3
   } kv_err_e;
 
-  localparam int unsigned XMEM_AW_DEF = 23; // 字节地址引脚宽 → 8MB
-  localparam int unsigned XMEM_DW_DEF = 16; // 数据总线宽(8/16/32)
-  localparam int unsigned XMEM_WS_DEF = 0;  // 附加等待拍
+  localparam int unsigned XMEM_AW_DEF = 23;
+  localparam int unsigned XMEM_DW_DEF = 16;
+  localparam int unsigned XMEM_WS_DEF = 0;
 
   localparam logic [31:0] XM_PROG_OFF    = 32'h0000_0000; // 128KB
   localparam logic [31:0] XM_PROG_SIZE   = 32'h0002_0000;
@@ -200,10 +200,10 @@ package amechip_pkg;
   localparam logic [31:0] XM_SCRATCH_SIZE = 32'h0001_0000;
 
   localparam int unsigned KV_BANKS_DEF   = 4;    // = n_head
-  localparam int unsigned KV_CTX_MAX     = 256;  // 最大上下文
+  localparam int unsigned KV_CTX_MAX     = 256;
   localparam int unsigned KV_ROW_BYTES   = 64;   // d_head INT8
   localparam int unsigned KV_ROW_WORDS   = KV_ROW_BYTES/4;   // 16
-  localparam int unsigned KV_BANK_DEPTH  = KV_CTX_MAX * KV_ROW_WORDS; // 4096 字
+  localparam int unsigned KV_BANK_DEPTH  = KV_CTX_MAX * KV_ROW_WORDS;
   localparam int unsigned KV_BANK_AW     = 12;   // log2(KV_BANK_DEPTH)
 
   function automatic logic [31:0] kv_off (
@@ -234,7 +234,7 @@ package amechip_pkg;
       4'd7:    w_layer_off = 32'h0014_0000; // L1.ffn1    262144 B
       4'd8:    w_layer_off = 32'h0018_0000; // L1.ffn2    262144 B
       4'd9:    w_layer_off = 32'h001C_0000; // lm_head    262144 B
-      default: w_layer_off = 32'h0020_0000; // blob 总末址(= 2MB)
+      default: w_layer_off = 32'h0020_0000;
     endcase
   endfunction
 
@@ -246,7 +246,7 @@ package amechip_pkg;
 
   typedef struct packed {
     axi_addr_t addr;
-    logic [2:0] prot; // 恒 0
+    logic [2:0] prot;
   } axi_aw_t;
 
   typedef struct packed {
@@ -273,7 +273,7 @@ package amechip_pkg;
     AME_OP_QCFG = 3'h1,
     AME_OP_LDW  = 3'h2,
     AME_OP_LDX  = 3'h3,
-    AME_OP_EXE  = 3'h4, // EXEF 由 funct7 区分,枚举同 funct3
+    AME_OP_EXE  = 3'h4,
     AME_OP_STY  = 3'h5,
     AME_OP_STQ  = 3'h6,
     AME_OP_SYNC = 3'h7

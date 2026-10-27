@@ -3,19 +3,19 @@
 `endif
 
 module ame_buf_rf #(
-  parameter int unsigned DEPTH  = 1024,             // 字节数(2 的幂,4 的倍数)
-  parameter int unsigned ROW_B  = 16,               // 宽读口每次读出的字节数(≤ DEPTH)
-  parameter int unsigned AW     = $clog2(DEPTH)     // 字节地址宽
+  parameter int unsigned DEPTH  = 1024,
+  parameter int unsigned ROW_B  = 16,
+  parameter int unsigned AW     = $clog2(DEPTH)
 ) (
   input logic clk,
 
   input logic        we_i,
-  input logic [31:0] waddr_i,     // buffer 内字节偏移(已 mod DEPTH,4 对齐)
+  input logic [31:0] waddr_i,
   input logic [31:0] wdata_i,
   input logic [3:0]  wstrb_i,
 
   input  logic        rd32_go_i,
-  input  logic [31:0] raddr32_i,  // 4 对齐
+  input  logic [31:0] raddr32_i,
   output logic [31:0] rdata32_o,
 
   input  logic              rd_row_go_i,

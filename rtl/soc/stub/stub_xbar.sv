@@ -9,7 +9,7 @@ module stub_xbar (
   output soc_pkg::soc_resp_t m1_resp,
   input  soc_pkg::soc_req_t  m2_req,   // DMA_WR
   output soc_pkg::soc_resp_t m2_resp,
-  input  soc_pkg::soc_req_t  m3_req,   // KV_CTRL(stub 恒不发)
+  input  soc_pkg::soc_req_t  m3_req,
   output soc_pkg::soc_resp_t m3_resp,
 
   output soc_pkg::soc_req_t  s0_req,   // OCSRAM
@@ -24,7 +24,7 @@ module stub_xbar (
   input  soc_pkg::soc_resp_t s4_resp,
   output soc_pkg::soc_req_t  s5_req,   // DMA CSR
   input  soc_pkg::soc_resp_t s5_resp,
-  output soc_pkg::soc_req_t  s6_req,   // AME 窗口
+  output soc_pkg::soc_req_t  s6_req,
   input  soc_pkg::soc_resp_t s6_resp,
   output soc_pkg::soc_req_t  s7_req,   // KV CSR
   input  soc_pkg::soc_resp_t s7_resp,

@@ -28,14 +28,14 @@ module ame_ctrl #(
   output logic               mac_sel_o,
   output logic [5:0]         mac_k_o,
   output logic               mac_en_o,
-  output logic               mac_acc_o,   // 累加相(mac_en_o 延迟 1 拍)
+  output logic               mac_acc_o,
   output logic [5:0]         mac_n_eff_o,
   output logic               y_clr_o,
-  input  logic [32*amechip_pkg::RQ_ENTRIES-1:0] y_val_i, // 通道 n 在 [32n+:32](扁平,iverilog 兼容)
+  input  logic [32*amechip_pkg::RQ_ENTRIES-1:0] y_val_i,
 
   output logic [WBUF_AW-1:0] wrow_addr_o,
   output logic [XBUF_AW-1:0] xrow_addr_o,
-  input  logic               row_w_stall_i, // WBUF 读口本拍被总线读占用 → 装载顺延
+  input  logic               row_w_stall_i,
   input  logic               row_x_stall_i,
 
   output logic        rq_we_o,
@@ -49,16 +49,16 @@ module ame_ctrl #(
   input  logic [5:0]  rq_ra_s_i,
   input  logic        rq_ra_round_i,
 
-  input  logic       bus_err_i,        // 总线窗口非法访问 → sticky ERR
+  input  logic       bus_err_i,
   input  logic       evclear_done_i,
   input  logic       evclear_err_i,
   input  logic       irqen_we_i,
   input  logic [1:0] irqen_wdata_i,
-  output logic [1:0] irqen_o,          // 读回(STATUS 窗口 CSR)
-  output logic       irq_done_o,       // 电平 = IRQEN[0] & DONE(INTC 边沿锁存)
+  output logic [1:0] irqen_o,
+  output logic       irq_done_o,
   output logic       irq_err_o,
 
-  output logic       st_busy_o,        // STATUS[0]:阵列 exe 在跑
+  output logic       st_busy_o,
   output logic       st_done_o,        // STATUS[1]
   output logic       st_err_o,         // STATUS[7]
   output logic [3:0] st_rdy_o,         // STATUS[5:2] = {X1,X0,W1,W0}
@@ -144,7 +144,7 @@ module ame_ctrl #(
     w_region_c = cp_req_rs1_i[1:0];
     w_sel_c    = cp_req_rs1_i[2];
     w_rsv_c    = cp_req_rs1_i[31:3];
-    w_base_c   = WBUF_AW'((w_region_c * TILE_BYTES) % WBUF_DEPTH); // region 回卷(§3.3)
+    w_base_c   = WBUF_AW'((w_region_c * TILE_BYTES) % WBUF_DEPTH);
 
     x_off_c = cp_req_rs1_i[amechip_pkg::LDX_OFF_W-1:0];
     x_sel_c = cp_req_rs1_i[9];
@@ -176,7 +176,7 @@ module ame_ctrl #(
 
   always_comb begin
     unique case (op)
-      amechip_pkg::AME_OP_CFG : f7_ok_c = 1'b1; // I-type:f7 即 imm 域
+      amechip_pkg::AME_OP_CFG : f7_ok_c = 1'b1;
       amechip_pkg::AME_OP_QCFG: f7_ok_c = (f7 == amechip_pkg::AME_F7_QCFG);
       amechip_pkg::AME_OP_LDW : f7_ok_c = (f7 == amechip_pkg::AME_F7_LDW);
       amechip_pkg::AME_OP_LDX : f7_ok_c = (f7 == amechip_pkg::AME_F7_LDX);
@@ -215,7 +215,7 @@ module ame_ctrl #(
       amechip_pkg::AME_OP_SYNC:
         op_err_c = !f7_ok_c;
       default:
-        op_err_c = 1'b1; // 合法编码之外(CPU 本应 trap,防御性按 ERR 接受)
+        op_err_c = 1'b1;
     endcase
 
     if (op_err_c) begin
@@ -229,14 +229,14 @@ module ame_ctrl #(
         amechip_pkg::AME_OP_LDW: op_ready_c = grp_w_ok_c && !wld_active_q && !stq_pend_q;
         amechip_pkg::AME_OP_LDX: op_ready_c = grp_x_ok_c && !xld_active_q && !stq_pend_q;
         amechip_pkg::AME_OP_EXE: op_ready_c = idle_c && grp_e_ok_c && !stq_pend_q;
-        default:                 op_ready_c = !stq_pend_q; // 未知编码:防御性消费
+        default:                 op_ready_c = !stq_pend_q;
       endcase
     end
 
     unique case (op)
       amechip_pkg::AME_OP_STY:
         op_data_c = op_err_c ? 32'd0 : y_val_i[32*st_idx_c +: 32];
-      default:                 op_data_c = 32'd0; // st.q 数据由流水第 2 拍捕获
+      default:                 op_data_c = 32'd0;
     endcase
   end
 
@@ -279,8 +279,8 @@ module ame_ctrl #(
   assign mac_sel_o   = mac_sel_q;
   assign mac_k_o     = mac_k_q;
   assign mac_en_o    = mac_busy_q && (mac_phase_q == PH_RUN);
-  assign mac_acc_o   = mac_acc_q;      // mac_en 延迟 1 拍;末乘积在 DRAIN 相累加
-  assign mac_n_eff_o = cfg_n_eff_q;    // exe 期间 cfg 被反压锁定,实况读安全
+  assign mac_acc_o   = mac_acc_q;
+  assign mac_n_eff_o = cfg_n_eff_q;
   assign y_clr_o   = accept_c && (op == amechip_pkg::AME_OP_EXE) && e_isf_c && !op_err_c;
 
   assign rq_we_o     = accept_c && (op == amechip_pkg::AME_OP_QCFG) && !op_err_c;
@@ -346,7 +346,7 @@ module ame_ctrl #(
               mac_k_q <= mac_k_q + 6'd1;
             end
           end
-          default: begin // PH_DRAIN:末乘积本拍经 mac_acc_q 累加;BUSY 1→0
+          default: begin
             mac_busy_q        <= 1'b0;
             tset_q[mac_sel_q] <= amechip_pkg::AME_TSET_EMPTY;
             xset_q[mac_sel_q] <= amechip_pkg::AME_TSET_EMPTY;
@@ -368,10 +368,10 @@ module ame_ctrl #(
       resp_v2_q  <= stq2_q;
       stq_pend_q <= stq1_q || stq2_q;
       if (accept_c) begin
-        resp_data_q <= op_data_c;      // st.y=INT32,其余 0(st.q 占位)
+        resp_data_q <= op_data_c;
         resp_err_q  <= op_err_c;
       end else if (stq2_q) begin
-        resp_data_q <= {{24{stq_q8[7]}}, stq_q8};  // requant 第 3 拍结果
+        resp_data_q <= {{24{stq_q8[7]}}, stq_q8};
       end
 
       if (accept_c) begin
@@ -408,7 +408,7 @@ module ame_ctrl #(
               xset_q[e_tsel_c] <= amechip_pkg::AME_TSET_RUNNING;
             end
           end
-          default: ; // QCFG/ST*/SYNC:动作由组合写口与 resp 数据覆盖
+          default: ;
         endcase
       end
     end

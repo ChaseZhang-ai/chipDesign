@@ -11,7 +11,7 @@
 module tb_cpu_ame;
 
   localparam real CLKP    = 10.0;
-  localparam int  BIT_CYC = 13;        // boot/程序统一写 UART DIV=13
+  localparam int  BIT_CYC = 13;
 
   logic clk = 1'b0;
   logic rst_n = 1'b0;
@@ -75,7 +75,7 @@ module tb_cpu_ame;
   );
 
   wire        ame_irq_done, ame_irq_err, ame_mac_en, ame_idle;
-  wire        ame_busy = ~ame_idle;   // IDLE = 无 exe 且无 LOADING(§3)
+  wire        ame_busy = ~ame_idle;
   wire        awin_v, awin_ready, awin_wr, awin_rv, awin_err;
   wire [31:0] awin_addr, awin_wdata, awin_rdata;
   wire [3:0]  awin_strb;
@@ -387,7 +387,7 @@ module tb_cpu_ame;
   logic        exe_pending;
   logic [31:0] cyc;
   int          mon_accept, mon_resp, mon_err, mon_resp_bad, mon_stab_bad;
-  reg          acc_stq_c, acc_stq_d1, acc_stq_d2, acc_stq_d3; // 合法 st.q 的 3 拍 resp 跟踪(v0.3)
+  reg          acc_stq_c, acc_stq_d1, acc_stq_d2, acc_stq_d3;
   int          mon_exe_ok, mon_exe_bad, mon_merged, mon_done;
   int          mon_stall_cfg, mon_stall_qcfg, mon_stall_ld, mon_stall_exe, mon_stall_st, mon_stall_sync;
   int          perf_retired, perf_ar, perf_aw, perf_ame_busy, perf_mac, perf_dma_busy, perf_kv_busy, perf_cpu_bus;
@@ -443,9 +443,9 @@ module tb_cpu_ame;
       acc_stq_d2 <= acc_stq_d1;
       acc_stq_d3 <= acc_stq_d2;
       if (ame_resp_valid && acc_stq_c && !acc_stq_d1)
-        mon_resp_bad <= mon_resp_bad + 1;              // st.q 第 1 拍不应有 resp
+        mon_resp_bad <= mon_resp_bad + 1;
       if (ame_resp_valid && !acc_d && !acc_stq_d2)
-        mon_resp_bad <= mon_resp_bad + 1;              // 其余指令(含非法 st.q)仍须 1 拍
+        mon_resp_bad <= mon_resp_bad + 1;
       if (ame_resp_valid && cfg_pend) begin
         if (!ame_resp_err &&
             (cfg_imm_q[11:10] == 2'b00) && (cfg_imm_q[4:0] != 0) &&
@@ -463,7 +463,7 @@ module tb_cpu_ame;
         if (ame_resp_err) mon_err <= mon_err + 1;
       end
 
-      if (ame_resp_valid && acc_d) ; // (R3 已查)
+      if (ame_resp_valid && acc_d) ;
       if (ame_req_valid && ame_req_ready) begin
         acc_instr_q <= ame_req_instr;
         acc_rs1_q   <= ame_req_rs1;
@@ -497,7 +497,7 @@ module tb_cpu_ame;
       if (ame_req_valid && ame_req_ready && mon_is_exe) begin
         exe_pending    <= 1'b1;
         exe_acc_cyc    <= cyc;
-        exe_kt         <= cfg_kt;          // exe 承袭当前 cfg 影子
+        exe_kt         <= cfg_kt;
       end
       if (ame_mac_en && !mac_d) begin mac_start <= cyc; mac_run <= 1; end
       if (mac_run && !ame_mac_en) begin
@@ -551,7 +551,7 @@ module tb_cpu_ame;
     if (!$value$plusargs("EXP_UART=%s", F_EXP) || F_EXP == "") NEXP = 0;
     else $readmemh(F_EXP, exp_b);
     if (!$value$plusargs("SRAM_HEX=%s", F_SRAM)) F_SRAM = "";
-    if (!$value$plusargs("BOOT_HEX=%s", F_BOOT)) F_BOOT = "";   // 模型侧读同一 plusarg
+    if (!$value$plusargs("BOOT_HEX=%s", F_BOOT)) F_BOOT = "";
     if (!$value$plusargs("XMEM_HEX=%s", F_XMEM)) F_XMEM = "";
     if (!$value$plusargs("KV_HEX=%s",   F_KV))   F_KV   = "";
     if (!$value$plusargs("SCR_DUMP=%s", F_SCRD)) F_SCRD = "";

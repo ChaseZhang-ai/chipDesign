@@ -1,7 +1,7 @@
 
 module stub_ame #(
-  parameter int unsigned AME_M       = amechip_pkg::AME_M_DEF,   // K-tile 深度
-  parameter int unsigned AME_N       = amechip_pkg::AME_N_DEF,   // 输出路数
+  parameter int unsigned AME_M       = amechip_pkg::AME_M_DEF,
+  parameter int unsigned AME_N       = amechip_pkg::AME_N_DEF,
   parameter int unsigned WBUF_DEPTH  = amechip_pkg::WBUF_DEPTH,  // 1024
   parameter int unsigned XBUF_DEPTH  = amechip_pkg::XBUF_DEPTH   // 1024
 ) (
@@ -28,13 +28,13 @@ module stub_ame #(
   output logic        win_resp_err,
 
   output logic        busy_o,
-  output logic        evt_done_o,   // 已按 AME_IRQEN.DONE_EN 门控
-  output logic        evt_err_o     // 已按 AME_IRQEN.ERR_EN 门控
+  output logic        evt_done_o,
+  output logic        evt_err_o
 );
 
   localparam logic [5:0] M6 = AME_M;
   localparam logic [5:0] N6 = AME_N;
-  localparam logic [9:0] WBUF_MSK = WBUF_DEPTH - 1;   // 深度按 2 的幂(契约 1024)
+  localparam logic [9:0] WBUF_MSK = WBUF_DEPTH - 1;
   localparam logic [9:0] XBUF_MSK = XBUF_DEPTH - 1;
 
   logic signed [7:0]  tile [0:1][0:AME_N-1][0:AME_M-1];
@@ -50,9 +50,9 @@ module stub_ame #(
   logic [1:0] tset [0:1];
   logic [1:0] xset [0:1];
 
-  logic [5:0] run_cnt;      // exe 背景计数(KT+2)
-  logic [5:0] ldw_cnt;      // ld.w 背景计数(AME_M)
-  logic [1:0] ldx_cnt;      // ld.x 背景计数(2)
+  logic [5:0] run_cnt;
+  logic [5:0] ldw_cnt;
+  logic [1:0] ldx_cnt;
   logic       run_tsel;
   logic       ldw_tsel, ldw_r1, ldw_r0;
   logic       ldx_xsel;
@@ -126,10 +126,10 @@ module stub_ame #(
     longint prod;
     prod = longint'(y) * longint'(m);
     if (s == 6'd0) begin
-      requant_ch = 8'sd0;                        // 复位表项按 0(S≥1 由 qcfg 保证)
+      requant_ch = 8'sd0;
     end else begin
       if (rnd) prod = prod + (64'sd1 <<< (s - 6'd1));
-      prod = prod >>> s;                         // 算术右移(向下取整)
+      prod = prod >>> s;
       if      (prod > 127)  requant_ch = 8'sd127;
       else if (prod < -128) requant_ch = -8'sd128;
       else                  requant_ch = prod[7:0];
@@ -221,7 +221,7 @@ module stub_ame #(
             end
             for (int n = 0; n < AME_N; n++) y_acc[n] <= tmp[n][31:0];
           end
-          tset[run_tsel] <= amechip_pkg::AME_TSET_EMPTY;   // §3.5:完成后 → EMPTY
+          tset[run_tsel] <= amechip_pkg::AME_TSET_EMPTY;
           xset[run_tsel] <= amechip_pkg::AME_TSET_EMPTY;
         end
         run_cnt <= run_cnt - 6'd1;
@@ -256,12 +256,12 @@ module stub_ame #(
         end else if (is_exe) begin
           if (!invalid_c) begin
             if (f7 == amechip_pkg::AME_F7_EXEF) begin
-              for (int n = 0; n < AME_N; n++) y_acc[n] <= 32'sd0;  // EXEF 先清 Y
+              for (int n = 0; n < AME_N; n++) y_acc[n] <= 32'sd0;
             end
             run_tsel <= req_rs1[0];
             tset[req_rs1[0]] <= amechip_pkg::AME_TSET_RUNNING;
             xset[req_rs1[0]] <= amechip_pkg::AME_TSET_RUNNING;
-            run_cnt  <= cfg_kt + 6'd2;                          // §3.5:KT+2 拍
+            run_cnt  <= cfg_kt + 6'd2;
           end
         end else if (is_sty || is_stq) begin
           resp_data_q <= st_data_c;
@@ -269,7 +269,7 @@ module stub_ame #(
       end
 
       if (accept && invalid_c) st_err_q <= 1'b1;
-      if (exe_last) st_done_q <= 1'b1;                 // BUSY 1→0(简化口径)
+      if (exe_last) st_done_q <= 1'b1;
       if (win_evclr_done) st_done_q <= 1'b0;           // W1C(§4.7 EVCLEAR)
       if (win_evclr_err)  st_err_q  <= 1'b0;
     end
@@ -310,7 +310,7 @@ module stub_ame #(
 
   wire        y32_n_ok = ({1'b0, woff[6:2]} < {1'b0, N6});   // n < AME_N
   wire [4:0]  y32_n    = woff[6:2];
-  wire [1:0]  yq_word  = woff[3:2];                // YQ 内字序 0..3(32B 区只用前 16B)
+  wire [1:0]  yq_word  = woff[3:2];
 
   assign win_evclr_done = win_wr && is_evclear && win_req_wdata[0];
   assign win_evclr_err  = win_wr && is_evclear && win_req_wdata[1];
@@ -342,8 +342,8 @@ module stub_ame #(
       end
     end else if (in_y32) begin
       if (win_wr) begin
-        if (!y32_n_ok)   win_wr_err_c = 1'b1;          // n ≥ AME_N:未定义
-        else if (busy_o) win_wr_err_c = 1'b1;          // busy 时写 → SLVERR(§4.7)
+        if (!y32_n_ok)   win_wr_err_c = 1'b1;
+        else if (busy_o) win_wr_err_c = 1'b1;
       end else begin
         win_rd_c = y32_n_ok ? y_acc[y32_n] : 32'd0;
       end
@@ -351,7 +351,7 @@ module stub_ame #(
       if (win_wr) begin
         win_wr_err_c = 1'b1;                           // YQ RO
       end else begin
-        if (woff[4] == 1'b0) begin                     // 字 0..3 = 通道 0..15
+        if (woff[4] == 1'b0) begin
           win_rd_c = {requant_ch(y_acc[{yq_word, 2'd3}], rq_m[{yq_word, 2'd3}], rq_s[{yq_word, 2'd3}], rq_rnd[{yq_word, 2'd3}]),
                       requant_ch(y_acc[{yq_word, 2'd2}], rq_m[{yq_word, 2'd2}], rq_s[{yq_word, 2'd2}], rq_rnd[{yq_word, 2'd2}]),
                       requant_ch(y_acc[{yq_word, 2'd1}], rq_m[{yq_word, 2'd1}], rq_s[{yq_word, 2'd1}], rq_rnd[{yq_word, 2'd1}]),
@@ -371,9 +371,9 @@ module stub_ame #(
       else win_rd_c = ame_irqen_q;
     end else if (is_evclear) begin
       if (win_wr) ;
-      else win_rd_c = 32'd0;                           // W1C 寄存器读 0(与 ame_core 一致)
+      else win_rd_c = 32'd0;
     end else begin
-      if (win_wr) win_wr_err_c = 1'b1;                 // 窗口内未定义偏移写 → SLVERR
+      if (win_wr) win_wr_err_c = 1'b1;
     end
   end
 

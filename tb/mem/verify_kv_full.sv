@@ -21,7 +21,7 @@ module verify_kv_full;
 
   localparam logic [31:0] SRC_BASE = 32'h4048_0000;
   localparam logic [31:0] DST_BASE = 32'h0000_0800;
-  localparam int unsigned  KV_HW_BASE = 32'h0020_0000; // 0x4040_0000 的器件半字索引
+  localparam int unsigned  KV_HW_BASE = 32'h0020_0000;
 
   logic clk = 1'b0;
   logic rst_n;
@@ -237,7 +237,7 @@ module verify_kv_full;
   end
 
   initial begin
-    #1_000_000_000; // 1 s 仿真时间看门狗
+    #1_000_000_000;
     $display("[FAIL] verify_kv_full 全局超时");
     $display("VERIFY_KV: FAIL");
     $finish;

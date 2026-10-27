@@ -22,7 +22,7 @@ module soc_intc (
 );
 
   logic [31:0] en_q;
-  logic [31:0] pend_latch_q;    // 边沿源锁存位
+  logic [31:0] pend_latch_q;
   logic        resp_vld_q;
   logic [31:0] resp_dat_q;
   logic [1:0]  resp_err_q;
@@ -74,7 +74,7 @@ module soc_intc (
       if (req_fire && wr_en) begin
         case (aoff)
           amechip_pkg::INTC_EN_OFF[4:0]:    en_q <= bus_req.wdata;
-          amechip_pkg::INTC_CLEAR_OFF[4:0]: begin    // W1C:只作用于边沿锁存位
+          amechip_pkg::INTC_CLEAR_OFF[4:0]: begin
             pend_latch_q <= pend_latch_q & ~bus_req.wdata;
           end
           amechip_pkg::INTC_SET_OFF[4:0]:   pend_latch_q <= pend_latch_q | bus_req.wdata;

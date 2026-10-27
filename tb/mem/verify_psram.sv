@@ -2,14 +2,14 @@ module verify_psram #(
   parameter int unsigned A_BITS = 23
 ) (
   input  logic              clk_i,
-  input  logic [A_BITS-1:0] a_i,     // 字节地址
-  input  logic [15:0]       di_i,    // 芯片 → 器件
-  output logic [15:0]       do_o,    // 器件 → 芯片(地址拍后一拍有效)
+  input  logic [A_BITS-1:0] a_i,
+  input  logic [15:0]       di_i,
+  output logic [15:0]       do_o,
   input  logic              ce_ni,
   input  logic              oe_ni,
   input  logic              we_ni
 );
-  localparam int unsigned NW = 1 << (A_BITS - 1); // 半字数(8 MB → 4M)
+  localparam int unsigned NW = 1 << (A_BITS - 1);
   logic [15:0] mem [0:NW-1];
   logic [15:0] do_q;
 

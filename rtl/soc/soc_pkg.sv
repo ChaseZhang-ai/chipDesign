@@ -5,11 +5,11 @@
 package soc_pkg;
 
   typedef struct packed {
-    logic        valid;   // master 保持至看到 resp.valid
+    logic        valid;
     logic        write;   // 1=store 0=load
-    logic [31:0] addr;    // 字节地址
+    logic [31:0] addr;
     logic [31:0] wdata;
-    logic [3:0]  wstrb;   // write=0 时忽略
+    logic [3:0]  wstrb;
   } soc_req_t;
 
   typedef struct packed {

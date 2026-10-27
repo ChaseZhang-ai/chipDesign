@@ -135,7 +135,7 @@ module tb_dma;
                            input int xcnt, ycnt,
                            input logic [31:0] sp_in, dp_in,
                            input bit sfix, dfix,
-                           input int unsigned base_hi,  // 期望图像高 16 位(区分测试)
+                           input int unsigned base_hi,
                            input int unsigned n);
   endtask
 
@@ -292,7 +292,7 @@ module tb_dma;
       dma_go(1'b0);
       repeat (10) @(posedge clk);
       bfm_check_eq("BUSY=1", {31'b0, dut.u_dma.busy_q}, 32'b1);
-      axi_write(32'h2000_0000, 32'hDEAD_BEEF); // BUSY 中写 SRC 应被忽略
+      axi_write(32'h2000_0000, 32'hDEAD_BEEF);
       axi_read(32'h2000_0000, d);
       bfm_check_eq("BUSY 写忽略", d, 32'h4000_8000);
       axi_write(32'h2000_0018, 32'h2);        // ABORT(W1P)
@@ -335,7 +335,7 @@ module tb_dma;
       n = 256;
       for (int i = 0; i < n; i++) axi_write(32'h4002_0000 + 4*i, 32'hC000_0000 + i);
       dma_run_measure(32'h4002_0000, 32'h0000_0000, n[31:0], 32'd1, 0, 0, 32'h10, cyc, st);
-      mbps = real'(n) * 4.0 * 120.0 / real'(cyc); // 4B/字 × 120MHz / 周期数 = MB/s
+      mbps = real'(n) * 4.0 * 120.0 / real'(cyc);
       $display("[perf] XMEM→OCSRAM  %0d 字: %0d 周期 = %.2f 周期/字 = %.1f MB/s",
                n, cyc, real'(cyc) / real'(n), mbps);
       check_mem("THR xm2oc 抽查", 32'h0000_0000, 8, 32'hC000_0000);

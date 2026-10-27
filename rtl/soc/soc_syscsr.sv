@@ -11,8 +11,8 @@ module soc_syscsr (
   input  logic               dma_busy_i,
   input  logic               kv_busy_i,
 
-  output logic               soft_set_o,    // 1 拍脉冲
-  output logic               soft_clear_o   // 1 拍脉冲
+  output logic               soft_set_o,
+  output logic               soft_clear_o
 );
 
   logic [31:0] scratch0_q, scratch1_q;
@@ -58,7 +58,7 @@ module soc_syscsr (
             amechip_pkg::SYS_SCR1_OFF[4:0]:       scratch1_q <= bus_req.wdata;
             amechip_pkg::SYS_SIRQ_SET_OFF[4:0]:   soft_set_o   <= |bus_req.wdata;  // W1S
             amechip_pkg::SYS_SIRQ_CLEAR_OFF[4:0]: soft_clear_o <= |bus_req.wdata;  // W1C
-            default:                              resp_err_q <= amechip_pkg::AXI_SLVERR; // RO/保留
+            default:                              resp_err_q <= amechip_pkg::AXI_SLVERR;
           endcase
         end else begin
           resp_dat_q <= rd_data_c;
@@ -66,7 +66,7 @@ module soc_syscsr (
             amechip_pkg::SYS_SCR0_OFF[4:0],
             amechip_pkg::SYS_SCR1_OFF[4:0],
             amechip_pkg::SYS_SIRQ_SET_OFF[4:0],
-            amechip_pkg::SYS_SIRQ_CLEAR_OFF[4:0]: resp_err_q <= amechip_pkg::AXI_SLVERR; // W-only 读
+            amechip_pkg::SYS_SIRQ_CLEAR_OFF[4:0]: resp_err_q <= amechip_pkg::AXI_SLVERR;
             default: ;
           endcase
         end

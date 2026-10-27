@@ -38,7 +38,7 @@ module stub_memc (
       resp_err_q <= 2'b00;
       if (req_fire) begin
         resp_vld_q <= 1'b1;
-        resp_err_q <= amechip_pkg::AXI_DECERR;   // stub 无器件模型:报错醒目
+        resp_err_q <= amechip_pkg::AXI_DECERR;
       end
     end
   end

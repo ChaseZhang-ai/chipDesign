@@ -19,7 +19,7 @@ module tb_ame_model #(
   output logic [31:0] resp_data,
   output logic        resp_err,
 
-  input  logic        xstall_i      // 人为反压(协议合法的额外 !ready)
+  input  logic        xstall_i
 );
 
   logic [5:0]  n_eff, kt;
@@ -34,8 +34,8 @@ module tb_ame_model #(
 
   logic [1:0] tset [0:1];
   logic [1:0] xset [0:1];
-  logic [7:0] ld_cnt  [0:3];   // [0:1]=ld.w 组 0/1,[2:3]=ld.x 组 0/1
-  logic [7:0] exe_cnt;         // exe 背景倒计时(→ 阵列 IDLE)
+  logic [7:0] ld_cnt  [0:3];
+  logic [7:0] exe_cnt;
 
   wire array_idle = (exe_cnt == 8'd0) && (tset[0] != 2'd1) && (tset[1] != 2'd1);
 
@@ -77,8 +77,8 @@ module tb_ame_model #(
     logic signed [63:0] mm;
     logic signed [31:0] v;
     begin
-      yy = {{32{y[nidx][31]}}, y[nidx]};      // y:int64 语义符号扩展
-      mm = $signed({32'h0, rq_m[nidx]});      // M:uint32 零扩展
+      yy = {{32{y[nidx][31]}}, y[nidx]};
+      mm = $signed({32'h0, rq_m[nidx]});
       p  = yy * mm;
       if (rq_r[nidx]) p = p + (64'sd1 <<< (rq_s[nidx] - 1));
       v = p >>> rq_s[nidx];
@@ -118,7 +118,7 @@ module tb_ame_model #(
             r_data = (f3 == 3'd5) ? y[req_rs1[4:0]] : requant(req_rs1[4:0]);
           end
         end
-        default: ; // sync:无操作
+        default: ;
       endcase
     end
   end
@@ -170,19 +170,19 @@ module tb_ame_model #(
           end
           3'd2: if (!r_err) begin
             tset[req_rs1[2]]   <= 2'd1;
-            ld_cnt[req_rs1[2]] <= 8'd16;               // AME_M 拍装载(§6)
+            ld_cnt[req_rs1[2]] <= 8'd16;
             for (n = 0; n < AME_N; n++)
               for (k = 0; k < AME_M; k++)
                 tile[req_rs1[2]][n][k] <= wbuf[req_rs1[1:0] * 256 + n * kt + k];
           end
           3'd3: if (!r_err) begin
             xset[req_rs1[9]]     <= 2'd1;
-            ld_cnt[2 + req_rs1[9]] <= 8'd2;            // ≤2 拍(§6)
+            ld_cnt[2 + req_rs1[9]] <= 8'd2;
             for (k = 0; k < AME_M; k++)
               xreg[req_rs1[9]][k] <= xbuf[req_rs1[8:0] + k];
           end
           3'd4: if (!r_err) begin
-            if (f7 == 7'h05) for (n = 0; n < AME_N; n++) y[n] <= 32'sd0; // EXEF 清 Y
+            if (f7 == 7'h05) for (n = 0; n < AME_N; n++) y[n] <= 32'sd0;
             for (k = 0; k < AME_M; k++)
               for (n = 0; n < AME_N; n++) begin
                 prod = $signed(tile[req_rs1[0]][n][k]) * $signed(xreg[req_rs1[0]][k]);
@@ -193,7 +193,7 @@ module tb_ame_model #(
               end
             tset[req_rs1[0]]   <= 2'd3;
             xset[req_rs1[0]]   <= 2'd3;
-            exe_cnt            <= kt + 8'd2;           // KT+2 拍(§6)
+            exe_cnt            <= kt + 8'd2;
           end
           default: ;
         endcase

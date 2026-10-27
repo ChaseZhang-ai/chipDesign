@@ -7,7 +7,7 @@ module ame_rqtab (
   input logic rst_n,
 
   input logic        we_i,
-  input logic [4:0]  waddr_i,    // 通道号 n(rd 字段)
+  input logic [4:0]  waddr_i,
   input logic [31:0] wM_i,
   input logic [5:0]  wS_i,
   input logic        wround_i,

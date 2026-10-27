@@ -113,7 +113,7 @@ module verify_memc_repro;
         @(negedge clk);
         if (u_memc.st_q == 3'd6) begin // S_RV
           ar_valid = 1'b1; ar_addr = B;
-          @(posedge clk);            // 同一沿:pop A + push B
+          @(posedge clk);
           @(negedge clk);
           ar_valid = 1'b0;
           $display("[repro] 已在 S_RV 拍推入读 B(槽 0 旧值 = C1=%08h)", C1);

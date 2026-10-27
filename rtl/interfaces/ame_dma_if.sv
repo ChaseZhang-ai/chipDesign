@@ -8,15 +8,15 @@ interface ame_dma_if (
 );
 
   logic        req_valid;
-  logic        req_ready;        // 单笔 outstanding:接受后下一拍即响应
-  logic        req_write;        // 1=写 0=读
-  logic [31:0] req_addr;         // 绝对字节地址(AME 窗口内)
+  logic        req_ready;
+  logic        req_write;
+  logic [31:0] req_addr;
   logic [31:0] req_wdata;
-  logic [3:0]  req_wstrb;        // 读时忽略
+  logic [3:0]  req_wstrb;
 
   logic        resp_valid;
   logic [31:0] resp_rdata;
-  logic        resp_err;         // SLVERR 映射
+  logic        resp_err;
 
   modport master (
     output req_valid, req_write, req_addr, req_wdata, req_wstrb,

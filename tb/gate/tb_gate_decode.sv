@@ -5,7 +5,7 @@ module tb_gate_decode;
   localparam int BIT_CYC = 13;
   localparam real CLKP = 10.0;
   localparam int RST_CYC = 20;
-  localparam int IDLE_CYC = 90000;      // 首字节后静默阈值(ROM 停机判定)
+  localparam int IDLE_CYC = 90000;
   localparam int MAX_CYC = 1000000;
 
   logic clk = 1'b0;
@@ -135,7 +135,7 @@ module tb_gate_decode;
     while (nbytes > 0 && (cyc - last_byte_cyc) < IDLE_CYC && cyc < MAX_CYC)
       @(posedge clk);
 
-    repeat (100) @(posedge clk);   // 排空线上残余比特
+    repeat (100) @(posedge clk);
     $fclose(ufd);
 
     $display("\n[p4b_tb] ---- UART (%0d bytes) ----", nbytes);

@@ -46,7 +46,7 @@ module axi_xbar #(
   input  logic [2*NS-1:0]   s_r_resp_i
 );
 
-  localparam int unsigned NSP = NS + 1; // + 默认(DECERR)口,索引 = NS
+  localparam int unsigned NSP = NS + 1;
 
   function automatic logic [3:0] addr2slave (input logic [31:0] a);
     if (a <= amechip_pkg::A_OCSRAM_END)  addr2slave = 4'd0;
@@ -58,7 +58,7 @@ module axi_xbar #(
     else if (a >= amechip_pkg::A_AME_BASE     && a <= amechip_pkg::A_AME_END)     addr2slave = 4'd6;
     else if (a >= amechip_pkg::A_KV_BASE      && a <= amechip_pkg::A_KV_END)      addr2slave = 4'd7;
     else if (a >= amechip_pkg::A_XMEM_BASE    && a <= amechip_pkg::A_XMEM_END)    addr2slave = 4'd8;
-    else addr2slave = 4'd9; // 保留 → 默认口(索引 NS=9)DECERR
+    else addr2slave = 4'd9;
   endfunction
 
   logic [3:0] dec_w [0:NM-1];

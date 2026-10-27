@@ -3,8 +3,8 @@
 `endif
 
 module memc_xmem #(
-  parameter int unsigned AW = 23, // 字节地址引脚宽
-  parameter int unsigned WS = 0   // 每半字附加等待拍
+  parameter int unsigned AW = 23,
+  parameter int unsigned WS = 0
 ) (
   input  logic          clk_i,
   input  logic          rst_ni,
@@ -27,8 +27,8 @@ module memc_xmem #(
   output logic [31:0] r_data_o,
   output logic [1:0]  r_resp_o,
 
-  output logic          xmem_clk_o,   // = clk_i 直通
-  output logic [AW-1:0] xmem_a_o,     // 字节地址
+  output logic          xmem_clk_o,
+  output logic [AW-1:0] xmem_a_o,
   input  logic [15:0]   xmem_di_i,
   output logic [15:0]   xmem_do_o,
   output logic          xmem_ce_no,
@@ -38,7 +38,7 @@ module memc_xmem #(
 );
 
   /* verilator lint_off WIDTHTRUNC */
-  localparam logic [2:0] WS_L = WS; // 每半字附加等待拍
+  localparam logic [2:0] WS_L = WS;
   /* verilator lint_on WIDTHTRUNC */
 
   logic [AW-1:0]  wq_addr [0:3];
@@ -61,8 +61,8 @@ module memc_xmem #(
                          S_R0 = 3'd4, S_R1 = 3'd5, S_RV = 3'd6;
   logic [2:0]  st_q;
   logic [2:0]  ws_cnt;
-  logic [15:0] hw0_q;      // 读低半字缓存
-  logic        b_pend_q;   // 上一笔写 B 待交付
+  logic [15:0] hw0_q;
+  logic        b_pend_q;
 
   wire stall = xmem_wait_i;
   wire ws_hold = stall || (ws_cnt != 3'd0);
@@ -76,7 +76,7 @@ module memc_xmem #(
   wire b_done = b_valid_o && b_ready_i;
 
   assign r_valid_o = (st_q == S_RV);
-  assign r_data_o  = {xmem_di_i, hw0_q}; // 高半字当拍在 DQ 上
+  assign r_data_o  = {xmem_di_i, hw0_q};
   assign r_resp_o  = amechip_pkg::AXI_OKAY;
   wire r_done = r_valid_o && r_ready_i;
   wire rv_next_rd = (rq_next != 3'd0) && (wq_cnt == 3'd0);
@@ -109,7 +109,7 @@ module memc_xmem #(
       S_R1: begin xmem_a_o = r_head_a2;
                   xmem_ce_no = 1'b0; xmem_oe_no = 1'b0; end
       S_RV: begin
-        if (rv_next_rd) begin // 预驱下一读行首地址(与 RVAL 重叠)
+        if (rv_next_rd) begin
           xmem_a_o = r_next_a;
           xmem_ce_no = 1'b0; xmem_oe_no = 1'b0;
         end
@@ -118,7 +118,7 @@ module memc_xmem #(
     endcase
   end
 
-  wire w_pop = (st_q == S_W1) && !ws_hold; // 第二半字已驱动(器件将锁存)
+  wire w_pop = (st_q == S_W1) && !ws_hold;
   wire r_pop = (st_q == S_RV) && r_done;
   wire [2:0] rq_next = rq_cnt + (r_push ? 3'd1 : 3'd0) - (r_pop ? 3'd1 : 3'd0);
   wire start_rd_sel = (rq_cnt != 3'd0) && ((wq_cnt == 3'd0) || last_wr_q);
@@ -167,7 +167,7 @@ module memc_xmem #(
           end
           S_W0: begin st_q <= S_W1; ws_cnt <= WS_L; end
           S_W1: begin
-            b_pend_q <= 1'b1; // 本笔写完成,交 B
+            b_pend_q <= 1'b1;
             st_q     <= S_WB;
           end
           S_WB: begin
@@ -184,7 +184,7 @@ module memc_xmem #(
           end
           S_R0: begin st_q <= S_R1; ws_cnt <= WS_L; end
           S_R1: begin
-            hw0_q <= xmem_di_i; // 低半字当拍在 DQ 上
+            hw0_q <= xmem_di_i;
             st_q  <= S_RV;
           end
           S_RV: begin

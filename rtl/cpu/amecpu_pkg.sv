@@ -27,7 +27,7 @@ package amecpu_pkg;
   localparam logic [3:0] ALU_SRA   = 4'd7;
   localparam logic [3:0] ALU_SLT   = 4'd8;
   localparam logic [3:0] ALU_SLTU  = 4'd9;
-  localparam logic [3:0] ALU_COPYB = 4'd10; // LUI:结果 = imm
+  localparam logic [3:0] ALU_COPYB = 4'd10;
 
   localparam logic [2:0] LS_B  = 3'd0;
   localparam logic [2:0] LS_H  = 3'd1;
@@ -52,8 +52,8 @@ package amecpu_pkg;
 
   localparam logic [31:0] MCAUSE_MEXT_IRQ = 32'h8000_0010;
 
-  localparam logic [1:0] TRACE_FLAG_RD    = 2'b01; // rd 有效写回
-  localparam logic [1:0] TRACE_FLAG_SKIPW = 2'b10; // wdata 依赖 mcycle,差分跳过
+  localparam logic [1:0] TRACE_FLAG_RD    = 2'b01;
+  localparam logic [1:0] TRACE_FLAG_SKIPW = 2'b10;
 
 endpackage
 `endif // _AMECPU_PKG_SV

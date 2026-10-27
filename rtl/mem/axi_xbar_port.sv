@@ -4,7 +4,7 @@
 
 module axi_xbar_port #(
   parameter int unsigned NM     = 4,
-  parameter int unsigned PDEPTH = 16  // 属主 FIFO 深度(≥ 各主 outstanding 上限之和)
+  parameter int unsigned PDEPTH = 16
 ) (
   input  logic clk_i,
   input  logic rst_ni,

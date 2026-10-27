@@ -3,12 +3,12 @@
 `endif
 
 module ame_requant (
-  input  logic        clk_i,  // 乘积寄存时钟
-  input  logic [31:0] y_i,    // INT32 累加结果(有符号)
-  input  logic [31:0] m_i,    // uint32 乘数
-  input  logic [5:0]  s_i,    // 移位量 1..63(0 = 未配置,钳 0)
+  input  logic        clk_i,
+  input  logic [31:0] y_i,
+  input  logic [31:0] m_i,
+  input  logic [5:0]  s_i,
   input  logic        rnd_i,  // ROUND_SEL:1 = round-half-up
-  output logic [7:0]  q_o     // INT8 二补码(组合第 2 拍)
+  output logic [7:0]  q_o
 );
 
   logic [31:0] y1_q;
@@ -32,7 +32,7 @@ module ame_requant (
   logic [5:0]  sh_q;
   logic [63:0] rnd_add_q;
 
-  wire [63:0] p_u = y1_q * m1_q;   // 32×32 → 64(FF→FF,关键路径只剩乘法)
+  wire [63:0] p_u = y1_q * m1_q;
 
   always_ff @(posedge clk_i) begin
     p_u_q     <= p_u;
@@ -48,9 +48,9 @@ module ame_requant (
   logic [63:0] shifted;
 
   assign corr    = y_neg_q ? ({32'd0, m_q} << 32) : 64'd0;  // -(M<<32) mod 2^64
-  assign prod    = p_u_q - corr;                            // s64(y)×u64(M) 低 64 位
+  assign prod    = p_u_q - corr;
   assign biased  = prod + rnd_add_q;
-  assign shifted = $signed(biased) >>> sh_q;                // 算术右移
+  assign shifted = $signed(biased) >>> sh_q;
 
   always_comb begin
     if ($signed(shifted) > $signed(64'sd127))      q_o = 8'sd127;

@@ -317,7 +317,7 @@ module verify_dma_stress;
     repeat (5) @(posedge clk);
     rst_n = 1'b1;
     repeat (2) @(posedge clk);
-    axi_write(32'h1000_1008, 32'hFFFF_FFFF); // 清 INTC pending
+    axi_write(32'h1000_1008, 32'hFFFF_FFFF);
 
     for (int i = 0; i < npre; i++)
       u_dut.u_psram.poke_addr(prea[i], pred[i]);

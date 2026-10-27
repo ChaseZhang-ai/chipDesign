@@ -6,7 +6,7 @@ module kv_ctrl #(
   parameter int unsigned CTX_MAX      = amechip_pkg::KV_CTX_MAX,
   parameter int unsigned BANKS        = amechip_pkg::KV_BANKS_DEF,
   parameter int unsigned BPAW         = amechip_pkg::KV_BANK_AW,
-  parameter bit          KV_BACKEND_B = 1'b0 // 1=片上 bank 后端(bp 不占总线)
+  parameter bit          KV_BACKEND_B = 1'b0
 ) (
   input  logic clk_i,
   input  logic rst_ni,
@@ -74,7 +74,7 @@ module kv_ctrl #(
   output logic                  bp_kvt_o,
   input  logic                  bp_done_i,
   input  logic                  bp_err_i,
-  input  logic                  bp_ready_i, // 后端就绪(桥空闲;片上后端恒 1)
+  input  logic                  bp_ready_i,
 
   output logic                  irq_done_pulse_o,
   output logic                  irq_err_pulse_o
@@ -110,14 +110,14 @@ module kv_ctrl #(
                           ? w_dat[4:0] : reg_ctrl;
   wire       go_fire_w = csr_w_accept && !busy_q && (w_off == OFF_CTRL) && w_dat[8];
   logic      go_pend_q;
-  wire       go_fire = go_pend_q && !busy_q;   // 下一拍:寄存器已更新
+  wire       go_fire = go_pend_q && !busy_q;
   wire [2:0] go_mode  = reg_ctrl[2:0];
   wire       go_tr    = reg_ctrl[4];
   wire [5:0] go_ddoff = reg_slice[5:0];
   wire [6:0] go_dlen  = (reg_slice[11:6] == 6'd0) ? 7'd64
                                                   : {1'b0, reg_slice[11:6]};
   wire [6:0] go_sum7  = {1'b0, go_ddoff} + go_dlen;
-  wire [5:0] go_lastb = go_sum7[5:0] - 6'd1; // 和 ≤64 校验通过后恰为末字节
+  wire [5:0] go_lastb = go_sum7[5:0] - 6'd1;
 
   wire go_bad =
       (go_mode > 3'd5)
@@ -416,7 +416,7 @@ module kv_ctrl #(
         st_q      <= S_DRAIN;
       end
 
-      if (go_fire && go_bad) begin   // 仅在 GO 拍判参数错(不随寄存器变化误报)
+      if (go_fire && go_bad) begin
         err_q     <= 1'b1;
         errcode_q <= amechip_pkg::KV_ERR_POS;
         irq_err_pulse_o <= reg_ctrl[3];
@@ -487,7 +487,7 @@ module kv_ctrl #(
         buswr_off_q  <= buswr_off;
         buswr_stripe_q <= buswr_stripe;
         buswr_lane_q   <= buswr_lane;
-        wr_ph_q      <= 1'b0; // 先算首窗口
+        wr_ph_q      <= 1'b0;
       end
       if (buswr_busy_q && !buswr_pend_q && !wr_ph_q && (buswr_cur_q < buswr_e_q)) begin
         wr_slot_addr_q <= buswr_cur_q;
@@ -498,7 +498,7 @@ module kv_ctrl #(
       if (ib_wr_acc) begin
         buswr_pend_q <= 1'b1;
         buswr_cur_q  <= buswr_cur_q + 32'd4;
-        wr_ph_q      <= 1'b0; // 下一窗口重新计算
+        wr_ph_q      <= 1'b0;
       end
       if (ib_b_take && buswr_busy_q && buswr_pend_q) begin
         buswr_pend_q <= 1'b0;
@@ -531,15 +531,15 @@ module kv_ctrl #(
         end
         if (bp_idx_q == bp_hi_q) begin
           bp_run_q       <= 1'b0;
-          bp_op_done     <= 1'b1; // 整笔 bank 操作完成脉冲
+          bp_op_done     <= 1'b1;
           owner_bridge_q <= 1'b0;
         end else begin
           bp_idx_q  <= bp_idx_q + 5'd1;
-          bp_gap_q  <= 1'b1;      // 下一字前插一拍 cs=0
+          bp_gap_q  <= 1'b1;
         end
       end
       if (bp_gap_q && !(bp_done_i && bp_run_q && !bp_gap_q)) begin
-        bp_gap_q <= 1'b0;   // 间隙只持续一拍(拍内 done 被忽略)
+        bp_gap_q <= 1'b0;
       end
 
       case (st_q)
@@ -629,7 +629,7 @@ module kv_ctrl #(
             irq_err_pulse_o <= reg_ctrl[3];
             busy_q <= 1'b0; st_q <= S_IDLE;
           end else if (kv_q == 1'b0) begin
-            kv_q <= 1'b1; // 原状态重启引擎写 V 行
+            kv_q <= 1'b1;
           end else if (r_q == e_cnt_q - 32'd1) begin
             done_q <= 1'b1; busy_q <= 1'b0;
             irq_done_pulse_o <= reg_ctrl[3];

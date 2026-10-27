@@ -35,7 +35,7 @@ module stub_mem (
   input  logic               xmem_wait_i,
 
   output logic               dma_busy_o,
-  output logic               dma_done_evt_o,   // 已按 CTRL.IRQ_EN 门控
+  output logic               dma_done_evt_o,
   output logic               dma_err_evt_o,
   output logic               kv_busy_o
 );

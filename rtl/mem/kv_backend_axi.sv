@@ -48,8 +48,8 @@ module kv_backend_axi #(
   logic [BPAW-1:0] waddr_q;
   logic [31:0] wdata_q, rdata_q;
   logic        done_q, err_q;
-  logic        ar_sent_q, wr_sent_q;   // 单笔在途:发起后撤销 valid(防重复授予)
-  logic        cs_any_q;               // 上一拍 cs(上升沿锁存,防电平重复触发)
+  logic        ar_sent_q, wr_sent_q;
+  logic        cs_any_q;
 
   wire cs_any = |bp_cs_i;
   wire cs_rise = cs_any && !cs_any_q;

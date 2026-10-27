@@ -39,7 +39,7 @@ module soc_uart #(
   wire  tx_push_req = bus_req.valid && !resp_vld_q && bus_req.write
                    && bus_req.addr[4:0] == amechip_pkg::UART_TXDATA_OFF[4:0];
   wire  tx_push     = tx_push_req && (tcount + {{4{1'b0}}, tx_pop} < FIFO_DEPTH);
-  wire  tx_ovrun    = tx_push_req && !tx_push;   // 满且同拍无弹出可让位
+  wire  tx_ovrun    = tx_push_req && !tx_push;
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -51,7 +51,7 @@ module soc_uart #(
         twptr <= twptr + 4'd1;
       end
       if (tx_ovrun) begin
-        stat_ovrun_q <= 1'b1;        // 满时写入忽略 + OVERRUN(§4.4)
+        stat_ovrun_q <= 1'b1;
       end
       if (tx_pop) begin
         trptr  <= trptr + 4'd1;
@@ -113,7 +113,7 @@ module soc_uart #(
         case (rx_state)
           RX_IDLE: begin
             rx_baudcnt <= 32'd0;
-            if (!rx_in) rx_state <= RX_START;   // 起始沿
+            if (!rx_in) rx_state <= RX_START;
           end
           RX_START: begin
             if (rx_baudcnt >= (div_q >> 1) - 1) begin
@@ -122,7 +122,7 @@ module soc_uart #(
                 rx_state  <= RX_DATA;
                 rx_bitcnt <= 3'd0;
               end else begin
-                rx_state <= RX_IDLE;              // 毛刺
+                rx_state <= RX_IDLE;
               end
             end else begin
               rx_baudcnt <= rx_baudcnt + 32'd1;
@@ -141,13 +141,13 @@ module soc_uart #(
           RX_STOP: begin
             if (rx_baudcnt >= div_q - 1) begin
               rx_baudcnt <= 32'd0;
-              if (!rx_pop) begin                // 同拍 pop/push 冲突时丢弃新字节
+              if (!rx_pop) begin
                 if (!rx_full) begin
                   rfifo[rwptr] <= rx_shift;
                   rwptr        <= rwptr + 4'd1;
                   rcount       <= rcount + 5'd1;
                 end else begin
-                  stat_ovrun_q <= 1'b1;         // RX 溢出
+                  stat_ovrun_q <= 1'b1;
                 end
               end
               rx_state <= RX_IDLE;
@@ -182,7 +182,7 @@ module soc_uart #(
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       div_q  <= 32'(DIV_RESET);
-      ctrl_q <= 8'h40;                 // 水位复位值 = 4
+      ctrl_q <= 8'h40;
       stat_ovrun_q <= 1'b0;
       resp_vld_q <= 1'b0;
       resp_dat_q <= 32'd0;
@@ -201,13 +201,13 @@ module soc_uart #(
             amechip_pkg::UART_DIV_OFF[4:0]:  div_q  <= bus_req.wdata;
             amechip_pkg::UART_CTRL_OFF[4:0]: ctrl_q <= bus_req.wdata[7:0];
             amechip_pkg::UART_TXDATA_OFF[4:0],
-            amechip_pkg::UART_EVCLR_OFF[4:0]: ;  // 数据/清零通路见上
+            amechip_pkg::UART_EVCLR_OFF[4:0]: ;
             default:                         resp_err_q <= amechip_pkg::AXI_SLVERR;
           endcase
         end else begin
           resp_dat_q <= rd_data_c;
           if (aoff == amechip_pkg::UART_TXDATA_OFF[4:0] || aoff == amechip_pkg::UART_EVCLR_OFF[4:0])
-            resp_err_q <= amechip_pkg::AXI_SLVERR;  // W-only 寄存器读
+            resp_err_q <= amechip_pkg::AXI_SLVERR;
         end
       end
     end

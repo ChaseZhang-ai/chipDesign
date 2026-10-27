@@ -38,7 +38,7 @@ module amechip_mem (
   output logic               dma_done_evt_o,
   output logic               dma_err_evt_o,
   output logic               kv_busy_o,
-  output logic               kv_done_evt_o,   // P1BX-B:P3D-03 槽位新增;fake 恒 0
+  output logic               kv_done_evt_o,
   output logic               kv_err_evt_o
 );
 

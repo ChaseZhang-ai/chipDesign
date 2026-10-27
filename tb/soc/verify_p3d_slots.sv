@@ -440,7 +440,7 @@ module amechip_mem (
   output logic        dma_done_evt_o,
   output logic        dma_err_evt_o,
   output logic        kv_busy_o,
-  output logic        kv_done_evt_o,   // P3D-03/P1BX-B:KV 事件 → INTC bit6/7
+  output logic        kv_done_evt_o,
   output logic        kv_err_evt_o
 );
 
@@ -476,8 +476,8 @@ module amechip_mem (
   mem_ss_top #(
     .OC_SRAM_KB  (4),
     .BOOT_ROM_KB (2),
-    .BOOT_INIT   ("p3d_boot.hex"),   // vvp 工作目录 = tb/soc/build
-    .KV_BACKEND_B(1'b0),             // 后端 A(XMEM)
+    .BOOT_INIT   ("p3d_boot.hex"),
+    .KV_BACKEND_B(1'b0),
     .KV_CTX      (256),
     .DMA_FIFO    (8),
     .XMEM_WS     (0)

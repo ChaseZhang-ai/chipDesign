@@ -5,8 +5,8 @@
 module mem_ss_top #(
   parameter int unsigned OC_SRAM_KB   = 4,
   parameter int unsigned BOOT_ROM_KB  = 2,
-  parameter              BOOT_INIT    = "",   // BOOT ROM $readmemh 文件
-  parameter bit          KV_BACKEND_B = 1'b0, // 1=片上 bank(TB/小 ctx)
+  parameter              BOOT_INIT    = "",
+  parameter bit          KV_BACKEND_B = 1'b0,
   parameter int unsigned KV_CTX       = amechip_pkg::KV_CTX_MAX,
   parameter int unsigned DMA_FIFO     = amechip_pkg::DMA_FIFO_DEPTH,
   parameter int unsigned XMEM_WS      = amechip_pkg::XMEM_WS_DEF

@@ -8,13 +8,13 @@ module cpu_csr (
   input  logic [11:0] raddr_i,
   output logic [31:0] rdata_o,
   output logic        rlegal_o,
-  output logic        wro_o,     // 写口地址是否只读(核心据此判非法)
+  output logic        wro_o,
   input  logic        we_i,
   input  logic [11:0] waddr_i,
   input  logic [31:0] wdata_i,
   input  logic [2:0]  wf3_i,
   input  logic        retire_i,
-  input  logic [1:0]  retire_pend_i,  // EX 级读 minstret 时在 MEM/WB 的未退休指令数
+  input  logic [1:0]  retire_pend_i,
   input  logic        ev_ill_i,
   input  logic        ev_ame_err_i,
   input  logic        ev_bus_err_i,
@@ -80,7 +80,7 @@ module cpu_csr (
   wire csr_write_op = (wf3_i == 3'd1) || (wf3_i == 3'd5) ||   // CSRRW/CSRRWI
                       (wf3_i == 3'd2) || (wf3_i == 3'd6) ||   // CSRRS/CSRRSI
                       (wf3_i == 3'd3) || (wf3_i == 3'd7);     // CSRRC/CSRRCI
-  wire [31:0] w_old = rdata_o; // 写口与读口同地址(EX 使用;minstret 系 = 补偿后
+  wire [31:0] w_old = rdata_o;
   wire [31:0] w_new = (wf3_i == 3'd1 || wf3_i == 3'd5) ? wdata_i
                     : (wf3_i == 3'd2 || wf3_i == 3'd6) ? (w_old | wdata_i)
                     : (w_old & ~wdata_i);
@@ -93,7 +93,7 @@ module cpu_csr (
       minstret_q <= 64'h0;
       mie_q      <= 1'b0;
       mpie_q     <= 1'b0;
-      mtvec_q    <= 32'h0000_0100;          // 契约复位值(ARCH_SPEC §2)
+      mtvec_q    <= 32'h0000_0100;
       mepc_q     <= 32'h0;
       mcause_q   <= 32'h0;
       mscratch_q <= 32'h0;
@@ -118,8 +118,8 @@ module cpu_csr (
             if (w_new != rdata_o)
               minstret_q[31:0] <= w_new - {30'h0, retire_pend_i};
           amecpu_pkg::CSR_MINSTRETH, amecpu_pkg::CSR_INSTRETH:
-            minstret_q[63:32] <= w_new;   // 高字无在途补偿,直写
-          default: ; // RO 别名:写忽略(核心已按非法处理,不会到这)
+            minstret_q[63:32] <= w_new;
+          default: ;
         endcase
       end
 

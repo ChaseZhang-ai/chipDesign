@@ -42,8 +42,8 @@ module amechip_mem #(
   output logic               dma_done_evt_o,
   output logic               dma_err_evt_o,
   output logic               kv_busy_o,
-  output logic               kv_done_evt_o,   // P3D-03:KV 事件 → INTC bit6
-  output logic               kv_err_evt_o     // P3D-03:KV 事件 → INTC bit7
+  output logic               kv_done_evt_o,
+  output logic               kv_err_evt_o
 );
 
   assign s1_req = '0;

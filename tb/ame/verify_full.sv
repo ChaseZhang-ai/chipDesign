@@ -87,7 +87,7 @@ module tb_verify_full;
     end
   endtask
 
-  reg tight = 1'b0;   // +tight:去掉 TB 随机空拍(§5 紧凑节奏的 duty 测量用)
+  reg tight = 1'b0;
   reg [15:0] lfsr = 16'hC3A5;
   function [15:0] lfsr_next;
     begin
@@ -113,16 +113,16 @@ module tb_verify_full;
       u_cp.req_rs2   = rs2;
       accepted = 1'b0;
       if ((instr[14:12] == 3'h6) && (instr[31:25] == 7'h07) && chk_err && !exp_err) begin
-        @(negedge clk);            // T+1.5:接受沿已过;stq_pend 反压中,resp 未出
+        @(negedge clk);
         u_cp.req_valid = 1'b0;
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_stq_w1", 32'h0, {31'b0, u_cp.resp_valid});
-        @(negedge clk);            // T+2.5:requant 捕获+乘法在途,resp 未出
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_stq_w2", 32'h0, {31'b0, u_cp.resp_valid});
-        @(negedge clk);            // T+3.5:resp 窗口 [T+3, T+4)
+        @(negedge clk);
         accepted = 1'b1;
         checks = checks + 1;
         rd_data = u_cp.resp_data;
@@ -133,7 +133,7 @@ module tb_verify_full;
           report_mismatch("resp_data", exp_data, u_cp.resp_data);
         if (chk_err && (u_cp.resp_err !== exp_err))
           report_mismatch("resp_err", {31'b0, exp_err}, {31'b0, u_cp.resp_err});
-        @(negedge clk);            // T+4.5:单脉冲
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_pulse", 32'h0, {31'b0, u_cp.resp_valid});
@@ -149,7 +149,7 @@ module tb_verify_full;
         end
         if (stall < 500000) begin
           accepted = 1'b1;
-          @(negedge clk);        // 接受沿 + 0.5 拍
+          @(negedge clk);
         end
       end
       u_cp.req_valid = 1'b0;
@@ -167,12 +167,12 @@ module tb_verify_full;
           report_mismatch("resp_data", exp_data, u_cp.resp_data);
         if (chk_err && (u_cp.resp_err !== exp_err))
           report_mismatch("resp_err", {31'b0, exp_err}, {31'b0, u_cp.resp_err});
-        @(negedge clk);          // 接受沿 + 1.5:resp 必须已消隐(单脉冲)
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_pulse", 32'h0, {31'b0, u_cp.resp_valid});
       end
-      end // else(非 st.q 路径)
+      end
     end
   endtask
 
@@ -191,14 +191,14 @@ module tb_verify_full;
       u_bus.req_addr  <= addr;
       u_bus.req_wdata <= data;
       u_bus.req_wstrb <= wstrb;
-      @(negedge clk);            // T+1.5:resp 窗口 [T+1,T+2) 内
+      @(negedge clk);
       u_bus.req_valid <= 1'b0;
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b1)
         report_mismatch("bus_resp_valid", 32'h1, {31'b0, u_bus.resp_valid});
       if (u_bus.resp_err !== exp_err)
         report_mismatch("bus_wr_err", {31'b0, exp_err}, {31'b0, u_bus.resp_err});
-      @(negedge clk);            // T+2.5:单脉冲
+      @(negedge clk);
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b0)
         report_mismatch("bus_resp_pulse", 32'h0, {31'b0, u_bus.resp_valid});
@@ -221,7 +221,7 @@ module tb_verify_full;
       u_bus.req_valid <= 1'b0;
       if ((addr[11:0] >= 12'h880) && (addr[11:0] < 12'h8A0))
         repeat (2) @(negedge clk);
-      @(negedge clk);            // T+2.5:resp 窗口 [T+2, T+3)
+      @(negedge clk);
       checks = checks + 1;
       bus_rdata = u_bus.resp_rdata;
       bus_rerr  = u_bus.resp_err;
@@ -233,7 +233,7 @@ module tb_verify_full;
         if (u_bus.resp_err !== exp_err)
           report_mismatch("bus_rd_err", {31'b0, exp_err}, {31'b0, u_bus.resp_err});
       end
-      @(negedge clk);            // T+2.5:单脉冲
+      @(negedge clk);
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b0)
         report_mismatch("bus_resp_pulse", 32'h0, {31'b0, u_bus.resp_valid});

@@ -176,7 +176,7 @@ module tb_ame_proto;
     $display("SECTION T1 复位状态");
     bus_rd(BASE + 32'h08C0);
     if (bus_rdata_last !== 32'h0) fail_check("T1_status_reset");
-    cp_op((6'h05 << 25) | (3'h4 << 12) | 32'h0B, 32'h2, 0); // rs1[1]=1 非法
+    cp_op((6'h05 << 25) | (3'h4 << 12) | 32'h0B, 32'h2, 0);
     if (st_err !== 1'b1 || hung) fail_check("T1_badfield_exe_err");
 
     $display("SECTION T2 cfg/qcfg");
@@ -206,7 +206,7 @@ module tb_ame_proto;
     if (m_mac  !== kt)     fail_check("T3_mac_len");
 
     $display("SECTION T4 sync");
-    cp_op(CP_LDW, 5'd1, 0);      // 重装 g0
+    cp_op(CP_LDW, 5'd1, 0);
     cp_op(CP_LDX, 0, 0);
     @(negedge clk);
     u_cp.req_valid <= 1'b1;
@@ -285,7 +285,7 @@ module tb_ame_proto;
     u_cp.req_valid <= 1'b0;
     @(negedge clk);
     u_cp.req_valid <= 1'b1;
-    u_cp.req_instr <= CP_EXE;     // exe g1:应恰在 BUSY 下降后接受
+    u_cp.req_instr <= CP_EXE;
     u_cp.req_rs1   <= 32'h1;      // tsel=1
     u_cp.req_rs2   <= 32'h0;
     @(posedge clk);
@@ -333,7 +333,7 @@ module tb_ame_proto;
     if (irq_done !== 1'b1) fail_check("T7_irq_done_level");
     bus_wr(BASE + 32'h08C8, 32'h1, 4'hF);
     if (irq_done !== 1'b0) fail_check("T7_evclear_done");
-    bus_wr(BASE + 32'h0880, 32'h0, 4'hF);   // YQ 写 → SLVERR(裁决 A 后经总线可达)
+    bus_wr(BASE + 32'h0880, 32'h0, 4'hF);
     if (bus_err_last !== 1'b1) fail_check("T7_yq_wr_slverr");
     bus_rd(BASE + 32'h08C0);
     if (bus_rdata_last[7] !== 1'b1) fail_check("T7_err_sticky");

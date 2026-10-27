@@ -33,12 +33,12 @@ module vrfb_dma_model (
 
   localparam logic [2:0] S_IDLE = 3'd0, S_RD = 3'd1, S_WR = 3'd2, S_GAP = 3'd3, S_NEXT = 3'd4;
   logic [2:0]  st_q;
-  logic        phase_q;           // 0=读 1=写(sub FSM 交替)
+  logic        phase_q;
   logic [31:0] cur_s, cur_d;
   logic [31:0] line_s, line_d;
   logic [31:0] xleft_q, yleft_q;
   logic [31:0] rd_data_q;
-  logic [31:0] eff_sp_q, eff_dp_q;    // 生效行距(0 → 紧凑 XCNT*4)
+  logic [31:0] eff_sp_q, eff_dp_q;
 
   logic        csr_v_q;
   logic [31:0] csr_d_q;

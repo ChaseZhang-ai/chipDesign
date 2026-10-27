@@ -3,30 +3,30 @@
 `endif
 
 module ame_array #(
-  parameter int unsigned AME_M = amechip_pkg::AME_M_DEF, // K 维 tile 深度
-  parameter int unsigned AME_N = amechip_pkg::AME_N_DEF  // MAC lane 数
+  parameter int unsigned AME_M = amechip_pkg::AME_M_DEF,
+  parameter int unsigned AME_N = amechip_pkg::AME_N_DEF
 ) (
   input logic clk,
   input logic rst_n,
 
   input logic               tld_en_i,
-  input logic               tld_sel_i,    // tile 组号
-  input logic [5:0]         tld_n_i,      // 行号 n(0..AME_N-1,控制保证)
-  input logic [8*AME_M-1:0] tld_row_i,    // 行字节(小端:k=0 在 [7:0];同步读,次拍有效)
+  input logic               tld_sel_i,
+  input logic [5:0]         tld_n_i,
+  input logic [8*AME_M-1:0] tld_row_i,
 
   input logic               xld_en_i,
-  input logic               xld_sel_i,    // x 组号
+  input logic               xld_sel_i,
   input logic [8*AME_M-1:0] xld_row_i,
 
-  input logic        sel_i,               // 参与执行的 tile/x 组
-  input logic [5:0]  k_i,                 // 本拍 k(< AME_M)
-  input logic        mac_en_i,            // 本拍乘积相(RUN;prod_q 采样)
-  input logic        mac_acc_i,           // 本拍累加相(mac_en 延迟 1 拍,DRAIN 收尾)
-  input logic [5:0]  mac_n_eff_i,         // 本 exe 的 N_eff(lane ≥ N_eff 不累加,§3.5)
-  input logic        y_clr_i,             // EXEF:启动沿清 Y(与 mac_en_i 互斥)
+  input logic        sel_i,
+  input logic [5:0]  k_i,
+  input logic        mac_en_i,
+  input logic        mac_acc_i,
+  input logic [5:0]  mac_n_eff_i,
+  input logic        y_clr_i,
 
   input logic        y32_we_i,
-  input logic [5:0]  y32_addr_i,          // 通道号(< AME_N 由顶层译码保证)
+  input logic [5:0]  y32_addr_i,
   input logic [31:0] y32_wdata_i,
 
   output logic [32*amechip_pkg::RQ_ENTRIES-1:0] y_rdata_o
@@ -55,7 +55,7 @@ module ame_array #(
   logic [7:0] x_byte;
   assign x_byte = x_q[sel_i][k_i[KW-1:0]];
 
-  logic [15:0] prod_q [AME_N];   // 乘积寄存 1 级(P4A0 I-1 时序收敛)
+  logic [15:0] prod_q [AME_N];
 
   always_ff @(posedge clk) begin
     for (int n = 0; n < AME_N; n++)
@@ -68,9 +68,9 @@ module ame_array #(
     if (!rst_n) begin
       for (int n = 0; n < AME_N; n++) y_q[n] <= 32'd0;
     end else if (y_clr_i) begin
-      for (int n = 0; n < AME_N; n++) y_q[n] <= 32'd0;      // EXEF 启动沿
+      for (int n = 0; n < AME_N; n++) y_q[n] <= 32'd0;
     end else if (y32_we_i) begin
-      y_q[y32_addr_i[NW-1:0]] <= y32_wdata_i;               // bias 预置(IDLE 保证)
+      y_q[y32_addr_i[NW-1:0]] <= y32_wdata_i;
     end else if (mac_acc_i) begin
       for (int n = 0; n < AME_N; n++)
         if (5'(n) < mac_n_eff_i[4:0])

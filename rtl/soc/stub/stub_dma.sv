@@ -12,7 +12,7 @@ module stub_dma (
   input  soc_pkg::soc_resp_t wr_resp,
 
   output logic               busy_o,
-  output logic               evt_done_o,   // 已按 CTRL.IRQ_EN 门控
+  output logic               evt_done_o,
   output logic               evt_err_o
 );
 
@@ -76,7 +76,7 @@ module stub_dma (
               st_err_q     <= 1'b0;
               st_errcode_q <= 4'd0;
               if ((src_q[1:0] != 2'b00) || (dst_q[1:0] != 2'b00)) begin
-                st_err_q     <= 1'b1;               // 对齐错:不启动
+                st_err_q     <= 1'b1;
                 st_errcode_q <= 4'd1;
               end else if (xcnt_q == 0 || ycnt_q == 0) begin
                 st_err_q     <= 1'b1;
@@ -101,7 +101,7 @@ module stub_dma (
                 eng          <= ENG_IDLE;
                 st_busy_q    <= 1'b0;
                 st_err_q     <= 1'b1;
-                st_errcode_q <= 4'd2;               // 总线错
+                st_errcode_q <= 4'd2;
               end else begin
                 wr_data_q <= rd_resp.rdata;
                 eng       <= ENG_WR;
@@ -123,7 +123,7 @@ module stub_dma (
                   if (y_left == 32'd1) begin
                     eng       <= ENG_IDLE;
                     st_busy_q <= 1'b0;
-                    st_done_q <= 1'b1;              // 完成
+                    st_done_q <= 1'b1;
                   end else begin
                     y_left <= y_left - 1;
                     x_left <= xcnt_q;
@@ -159,7 +159,7 @@ module stub_dma (
               default: ;
             endcase
           end else if (aoff == amechip_pkg::DMA_STATUS_OFF[4:0]) begin
-            if (csr_req.wdata[1]) st_done_q <= 1'b0;     // DONE/ERR 的 W1C 随时可清
+            if (csr_req.wdata[1]) st_done_q <= 1'b0;
             if (csr_req.wdata[2]) st_err_q  <= 1'b0;
           end
         end
@@ -180,7 +180,7 @@ module stub_dma (
       amechip_pkg::DMA_YCNT_OFF[4:0]:   rd_data_c = ycnt_q;
       amechip_pkg::DMA_SPITCH_OFF[4:0]: rd_data_c = spitch_q;
       amechip_pkg::DMA_DPITCH_OFF[4:0]: rd_data_c = dpitch_q;
-      amechip_pkg::DMA_CTRL_OFF[4:0]:   rd_data_c = ctrl_q & 32'hFFFF_FFFE; // GO 读 0
+      amechip_pkg::DMA_CTRL_OFF[4:0]:   rd_data_c = ctrl_q & 32'hFFFF_FFFE;
       amechip_pkg::DMA_STATUS_OFF[4:0]: rd_data_c = {24'd0, st_errcode_q, 1'b0,
                                             st_err_q, st_done_q, st_busy_q};
       default:                          rd_data_c = 32'd0;

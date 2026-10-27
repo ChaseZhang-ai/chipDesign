@@ -42,7 +42,7 @@ module tb_amecpu;
     if (!$value$plusargs("SEED=%d", seed)) seed = 1;
   end
 
-  logic [31:0] mem [0:32767];      // 字节 0x0000_0000..0x0001_FFFF
+  logic [31:0] mem [0:32767];
 
   wire [31:0] ax_aw_addr, ax_w_data, ax_ar_addr, ax_r_data;
   wire [3:0]  ax_w_strb;
@@ -194,7 +194,7 @@ module tb_amecpu;
       $display("TB FAIL: cannot open trace file");
       $finish;
     end
-    for (j = 0; j < 32768; j = j + 1) mem[j] = 32'h0;  // 未加载区域读 0(与 ISS 一致)
+    for (j = 0; j < 32768; j = j + 1) mem[j] = 32'h0;
     $readmemh(hexfile, mem);
     repeat (8) @(posedge clk);
     rst_ni = 1'b1;
@@ -215,9 +215,9 @@ module tb_amecpu;
     end
   end
 
-  logic        prev_vnr = 1'b0;        // 上拍 valid&&!ready
+  logic        prev_vnr = 1'b0;
   logic [31:0] prev_instr = 32'h0, prev_rs1 = 32'h0, prev_rs2 = 32'h0;
-  logic        resp_expect_q = 1'b0;   // 上拍是否为接受沿
+  logic        resp_expect_q = 1'b0;
   integer      n_err = 0;
 
   task tb_error(input [2047:0] msg);

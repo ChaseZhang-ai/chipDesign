@@ -4,18 +4,18 @@
 
 module sram_behav #(
   parameter int unsigned WIDTH     = 32,
-  parameter int unsigned DEPTH     = 1024,            // 字数(2 的幂)
+  parameter int unsigned DEPTH     = 1024,
   parameter int unsigned AW        = $clog2(DEPTH),
-  parameter              INIT_FILE = ""               // "" = 不初始化
+  parameter              INIT_FILE = ""
 ) (
   input  logic                 clk_i,
-  input  logic                 rst_ni,   // 无复位逻辑,保留端口统一(未用)
-  input  logic                 cs_i,     // 拍使能
+  input  logic                 rst_ni,
+  input  logic                 cs_i,
   input  logic                 we_i,
   input  logic [AW-1:0]        addr_i,
   input  logic [WIDTH-1:0]     wdata_i,
   input  logic [WIDTH/8-1:0]   wstrb_i,
-  output logic [WIDTH-1:0]     rdata_o   // cs 拍采样,下一拍有效;cs=0 保持
+  output logic [WIDTH-1:0]     rdata_o
 );
 
   logic [WIDTH-1:0] mem [0:DEPTH-1];
@@ -29,7 +29,7 @@ module sram_behav #(
           end
         end
       end
-      rdata_o <= mem[addr_i]; // 同拍写同地址:非阻塞读 → 旧值
+      rdata_o <= mem[addr_i];
     end
   end
 

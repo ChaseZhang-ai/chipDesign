@@ -34,8 +34,8 @@ module ame_core #(
   output logic irq_done_o,
   output logic irq_err_o,
 
-  output logic dbg_mac_en_o,   // 本拍 MAC 阵列在发射(AME_N MAC/拍)
-  output logic dbg_idle_o      // 全局 IDLE(§3 定义)
+  output logic dbg_mac_en_o,
+  output logic dbg_idle_o
 );
 
   localparam int unsigned WBUF_AW  = $clog2(WBUF_DEPTH);
@@ -84,7 +84,7 @@ module ame_core #(
     .wdata_i     (wbuf_wdata),
     .wstrb_i     (wbuf_wstrb),
     .rd32_go_i   (wbuf_rd32_go),
-    .raddr32_i   (wbuf_waddr),        // 读偏移 = rel(与写同址)
+    .raddr32_i   (wbuf_waddr),
     .rdata32_o   (wbuf_rdata32),
     .rd_row_go_i (wbuf_rd_row_go),
     .raddr_row_i (wrow_addr),
@@ -98,7 +98,7 @@ module ame_core #(
     .wdata_i     (xbuf_wdata),
     .wstrb_i     (xbuf_wstrb),
     .rd32_go_i   (xbuf_rd32_go),
-    .raddr32_i   (xbuf_waddr),        // 读/写偏移 = rel - XBUF_OFF
+    .raddr32_i   (xbuf_waddr),
     .rdata32_o   (xbuf_rdata32),
     .rd_row_go_i (xbuf_rd_row_go),
     .raddr_row_i (xrow_addr),
@@ -109,7 +109,7 @@ module ame_core #(
   logic [5:0] tld_n_d;
 
   always_ff @(posedge clk_i) begin
-    tld_en_d  <= tld_en;    // 与宽行读数据(次拍有效)对齐
+    tld_en_d  <= tld_en;
     tld_sel_d <= tld_sel;
     tld_n_d   <= tld_n;
     xld_en_d  <= xld_en;
@@ -261,7 +261,7 @@ module ame_core #(
   assign wbuf_wstrb = bus_req_wstrb_i;
 
   assign xbuf_we    = bus_req_valid_i && bus_req_write_i && sel_xbuf && aligned;
-  assign xbuf_waddr = rel - amechip_pkg::AME_XBUF_OFF;   // P1BX-A §4:显式减偏移
+  assign xbuf_waddr = rel - amechip_pkg::AME_XBUF_OFF;
   assign xbuf_wdata = bus_req_wdata_i;
   assign xbuf_wstrb = bus_req_wstrb_i;
 
@@ -284,17 +284,17 @@ module ame_core #(
 
   assign bus_err = wr_err || rd_err;
 
-  logic        s1_v;                       // 读在途(resp 未交付)
+  logic        s1_v;
   logic        s1_err, s1_yq;
-  logic [12:0] s1_rel;                     // 窗口内偏移
-  logic [1:0]  s1_cnt;                     // YQ 数据拍计数:0=捕获 1=乘法 2=移位/交付
+  logic [12:0] s1_rel;
+  logic [1:0]  s1_cnt;
 
   wire acc_rd_c  = bus_req_valid_i && !bus_req_write_i;
   wire acc_buf_c = acc_rd_c && aligned && (sel_wbuf || sel_xbuf);
 
   assign wbuf_rd32_go   = acc_buf_c &&  sel_wbuf;
   assign xbuf_rd32_go   = acc_buf_c && !sel_wbuf;
-  assign wbuf_rd_row_go = tld_en;          // 装载宽行读(与总线读同拍时被读口优先级吸收)
+  assign wbuf_rd_row_go = tld_en;
   assign xbuf_rd_row_go = xld_en;
 
   logic s2_wbuf, s2_xbuf, s2_y32, s2_yq, s2_status, s2_irqen, s2_yq_ok;
@@ -318,12 +318,12 @@ module ame_core #(
   always_comb begin
     rd_data_s2 = 32'd0;
     if (!s1_err) begin
-      if (s2_wbuf)        rd_data_s2 = wbuf_rdata32;   // 接受沿服务的同步读数据(次拍有效)
+      if (s2_wbuf)        rd_data_s2 = wbuf_rdata32;
       else if (s2_xbuf)   rd_data_s2 = xbuf_rdata32;
       else if (s2_y32)    rd_data_s2 = s2_idx_ok ? y_val[32*s2_idx +: 32] : 32'd0;
       else if (s2_status) rd_data_s2 = {{24{1'b0}}, st_err, 1'b0, st_rdy, st_done, st_busy};
       else if (s2_irqen)  rd_data_s2 = {30'd0, irqen_q};
-      else                rd_data_s2 = 32'd0;          // YQ 在 d2 拍交付;EVCLEAR/未定义读 0
+      else                rd_data_s2 = 32'd0;
     end
   end
 
@@ -350,28 +350,28 @@ module ame_core #(
         s1_cnt  <= 2'd0;
       end else if (s1_v && s1_yq) begin
         if (s1_cnt == 2'd2) begin
-          s1_v   <= 1'b0;                    // YQ 交付完成
+          s1_v   <= 1'b0;
           s1_cnt <= 2'd0;
         end else begin
-          s1_cnt <= s1_cnt + 2'd1;           // 捕获→乘法→移位
+          s1_cnt <= s1_cnt + 2'd1;
         end
       end else if (s1_v) begin
-        s1_v    <= 1'b0;                     // 非 YQ:交付完成
+        s1_v    <= 1'b0;
         s1_cnt  <= 2'd0;
       end
 
       resp_v_q <= 1'b0;
       if (bus_req_valid_i && bus_req_write_i) begin
-        resp_v_q     <= 1'b1;                // 写:接受沿后 1 拍
+        resp_v_q     <= 1'b1;
         resp_rdata_q <= 32'd0;
         resp_err_q   <= wr_err;
       end else if (s1_v && s1_yq && (s1_cnt == 2'd2)) begin
-        resp_v_q     <= 1'b1;                // YQ:接受沿后 4 拍(requant 捕获+乘法两级)
+        resp_v_q     <= 1'b1;
         resp_rdata_q <= (s1_err || !s2_yq_ok) ? 32'd0
                                               : {yq_q8[3], yq_q8[2], yq_q8[1], yq_q8[0]};
         resp_err_q   <= s1_err;
       end else if (s1_v && !s1_yq) begin
-        resp_v_q     <= 1'b1;                // 其余读:接受沿后 2 拍
+        resp_v_q     <= 1'b1;
         resp_rdata_q <= rd_data_s2;
         resp_err_q   <= s1_err;
       end

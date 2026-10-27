@@ -70,7 +70,7 @@ module tb_p4b3_yosys;
   end
 
   initial begin
-    while (cyc < 100) @(posedge clk); // 等 plusarg initial 完成再读 flag
+    while (cyc < 100) @(posedge clk);
     if (wq_force) begin
       while (cyc < 1700) @(posedge clk);
       force dut.\u_mem.u_core.u_memc.wq_addr[0][1] = 1'b1 ;

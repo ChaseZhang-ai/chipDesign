@@ -46,7 +46,7 @@ module boot_rom #(
       if (req_fire) begin
         resp_vld_q <= 1'b1;
         if (bus_req.write) begin
-          resp_err_q <= amechip_pkg::AXI_SLVERR;   // ROM 只读
+          resp_err_q <= amechip_pkg::AXI_SLVERR;
         end else begin
           resp_dat_q <= mem[ridx];
         end

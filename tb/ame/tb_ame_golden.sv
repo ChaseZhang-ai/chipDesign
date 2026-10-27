@@ -103,7 +103,7 @@ module tb_ame_golden;
       u_cp.req_rs1   <= rs1;
       u_cp.req_rs2   <= rs2;
       is_stq = (instr[14:12] == 3'h6) && (instr[31:25] == 7'h07) && !exp_err;
-      @(negedge clk);              // 驱动后第 1 个中拍(若立即接受,处于 resp 窗口)
+      @(negedge clk);
       if (op_idx == 92)
         $display("DBG92 poll1 t=%0t resp=%b ready=%b | stq=%b", $time,
                  u_cp.resp_valid, u_cp.req_ready, is_stq);
@@ -111,15 +111,15 @@ module tb_ame_golden;
         $display("DBG1 poll1 t=%0t resp=%b ready=%b valid=%b instr=%h", $time,
                  u_cp.resp_valid, u_cp.req_ready, u_cp.req_valid, instr);
       if (is_stq) begin
-        u_cp.req_valid <= 1'b0;    // 接受沿 = 上一 posedge(固定节拍,见上)
+        u_cp.req_valid <= 1'b0;
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_stq_w1", 32'h0, {31'b0, u_cp.resp_valid});
-        @(negedge clk);            // 接受沿 + 1.5:requant 捕获+乘法在途,resp 未出
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_stq_w2", 32'h0, {31'b0, u_cp.resp_valid});
-        @(negedge clk);            // 接受沿 + 2.5:resp 窗口 [接受+2, 接受+3)
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b1)
           report_mismatch("resp_valid", 32'h1, {31'b0, u_cp.resp_valid});
@@ -127,18 +127,18 @@ module tb_ame_golden;
           report_mismatch("resp_data", exp_data, u_cp.resp_data);
         if (u_cp.resp_err !== exp_err)
           report_mismatch("resp_err", {31'b0, exp_err}, {31'b0, u_cp.resp_err});
-        @(negedge clk);            // +2.5:单脉冲
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_pulse", 32'h0, {31'b0, u_cp.resp_valid});
       end else if (u_cp.resp_valid === 1'b1) begin
-        u_cp.req_valid <= 1'b0;    // 接受沿已过,撤销请求
+        u_cp.req_valid <= 1'b0;
         checks = checks + 1;
         if (u_cp.resp_data !== exp_data)
           report_mismatch("resp_data", exp_data, u_cp.resp_data);
         if (u_cp.resp_err !== exp_err)
           report_mismatch("resp_err", {31'b0, exp_err}, {31'b0, u_cp.resp_err});
-        @(negedge clk);            // +1.5:单脉冲
+        @(negedge clk);
         checks = checks + 1;
         if (u_cp.resp_valid !== 1'b0)
           report_mismatch("resp_valid_pulse", 32'h0, {31'b0, u_cp.resp_valid});
@@ -153,8 +153,8 @@ module tb_ame_golden;
           $display("TIMEOUT %0s op#%0d cp 反压超时", case_name, op_idx);
           fails = fails + 1;
         end else begin
-          @(negedge clk);          // 接受沿 + 0.5:resp 窗口(接受沿已过)
-          u_cp.req_valid <= 1'b0;  // 接受沿已过,此处撤销不会影响本条接受
+          @(negedge clk);
+          u_cp.req_valid <= 1'b0;
           checks = checks + 1;
           if (u_cp.resp_valid !== 1'b1)
             report_mismatch("resp_valid", 32'h1, {31'b0, u_cp.resp_valid});
@@ -162,7 +162,7 @@ module tb_ame_golden;
             report_mismatch("resp_data", exp_data, u_cp.resp_data);
           if (u_cp.resp_err !== exp_err)
             report_mismatch("resp_err", {31'b0, exp_err}, {31'b0, u_cp.resp_err});
-          @(negedge clk);          // +1.5:单脉冲
+          @(negedge clk);
           checks = checks + 1;
           if (u_cp.resp_valid !== 1'b0)
             report_mismatch("resp_valid_pulse", 32'h0, {31'b0, u_cp.resp_valid});
@@ -180,14 +180,14 @@ module tb_ame_golden;
       u_bus.req_addr  <= addr;
       u_bus.req_wdata <= data;
       u_bus.req_wstrb <= wstrb;
-      @(negedge clk);            // 接受沿 + 0.5:resp 窗口
+      @(negedge clk);
       u_bus.req_valid <= 1'b0;
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b1)
         report_mismatch("bus_resp_valid", 32'h1, {31'b0, u_bus.resp_valid});
       if (u_bus.resp_err !== exp_err)
         report_mismatch("bus_wr_err", {31'b0, exp_err}, {31'b0, u_bus.resp_err});
-      @(negedge clk);            // +1.5:单脉冲
+      @(negedge clk);
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b0)
         report_mismatch("bus_resp_pulse", 32'h0, {31'b0, u_bus.resp_valid});
@@ -203,11 +203,11 @@ module tb_ame_golden;
       u_bus.req_addr  <= addr;
       u_bus.req_wdata <= 32'h0;
       u_bus.req_wstrb <= 4'h0;
-      @(negedge clk);            // 接受沿 + 0.5(读 resp 未出)
+      @(negedge clk);
       u_bus.req_valid <= 1'b0;
       if ((addr[11:0] >= 12'h880) && (addr[11:0] < 12'h8A0))
-        repeat (2) @(negedge clk); // YQ:requant 捕获+乘法两级,多等 2 拍(v0.3)
-      @(negedge clk);            // 接受沿 + 1.5:resp 窗口 [接受+1, 接受+2)
+        repeat (2) @(negedge clk);
+      @(negedge clk);
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b1)
         report_mismatch("bus_resp_valid", 32'h1, {31'b0, u_bus.resp_valid});
@@ -215,7 +215,7 @@ module tb_ame_golden;
         report_mismatch("bus_rd_data", exp_data, u_bus.resp_rdata);
       if (u_bus.resp_err !== exp_err)
         report_mismatch("bus_rd_err", {31'b0, exp_err}, {31'b0, u_bus.resp_err});
-      @(negedge clk);            // +2.5:单脉冲
+      @(negedge clk);
       checks = checks + 1;
       if (u_bus.resp_valid !== 1'b0)
         report_mismatch("bus_resp_pulse", 32'h0, {31'b0, u_bus.resp_valid});
@@ -245,7 +245,7 @@ module tb_ame_golden;
 
   reg [8*256-1:0] line;
   reg [8*128-1:0] ops_file;
-  string          line_s;   // P3A-01:Verilator 的 $sscanf 只接受 string 输入,
+  string          line_s;
   integer fd, code;
   reg [31:0] f0, f1, f2, f3, f4, f5;
 

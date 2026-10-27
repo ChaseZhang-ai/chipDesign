@@ -177,7 +177,7 @@ module vrfb_axi2b (
           if (ax_b_ready) wst_q <= W_GAP;
         end
         W_GAP: begin
-          wst_q <= W_IDLE;         // ≥1 空拍(捕获标志由 W_IDLE 消费时清零,
+          wst_q <= W_IDLE;
         end
         default: wst_q <= W_IDLE;
       endcase

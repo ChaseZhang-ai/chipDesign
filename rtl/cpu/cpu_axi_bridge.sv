@@ -70,7 +70,7 @@ module cpu_axi_bridge (
                || (w_fire  && (wr_q == W_AWDONE));
 
   assign ax_aw_valid = dm_wr_req && ((wr_q == W_IDLE) || (wr_q == W_WDONE)) && rst_ni;
-  assign ax_aw_addr  = {dm_addr_i[31:2], 2'b00};   // P3D-08:写地址对齐(同读)
+  assign ax_aw_addr  = {dm_addr_i[31:2], 2'b00};
   assign ax_w_valid  = dm_wr_req && ((wr_q == W_IDLE) || (wr_q == W_AWDONE)) && rst_ni;
   assign ax_w_data   = dm_wdata_i;
   assign ax_w_strb   = dm_wstrb_i;

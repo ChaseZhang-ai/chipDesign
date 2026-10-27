@@ -80,7 +80,7 @@ module vrfb_kv_model (
   end
 
   int i, b, fd, k, l, t, h, p, j;
-  int va, vb;   // 内部写入地址(Verilator:NBA 下标须为简单变量)
+  int va, vb;
   logic [31:0] tmpw [0:KVB/4-1];
   reg [1023:0] FNAME_KV, FNAME_KVD;
   logic        dump_d;

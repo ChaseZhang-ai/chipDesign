@@ -7,7 +7,7 @@
 
 module ame_cpu (
   input  logic clk_i,
-  input  logic rst_ni,              // 同步释放后的片内复位(clk_rst_if.rst_n)
+  input  logic rst_ni,
 
   output logic [31:0] ax_aw_addr,
   output logic        ax_aw_valid,
@@ -36,25 +36,25 @@ module ame_cpu (
   input  logic [31:0] ame_resp_data,
   input  logic        ame_resp_err,
 
-  input  logic        irq_i,        // INTC 汇集中断(高有效)
-  output logic        halt_o,       // ebreak 提交后置位(TB 停机,粘滞)
-  output logic        wfi_o,        // wfi 提交脉冲(最小实现 = NOP+脉冲,见 NOTES)
-  output logic        bus_err_o,    // 总线错误脉冲 → SoC INTC bit8(IRQ_BUSERR)
+  input  logic        irq_i,
+  output logic        halt_o,
+  output logic        wfi_o,
+  output logic        bus_err_o,
 
   output logic        trace_valid_o,
   output logic [31:0] trace_pc_o,
   output logic [31:0] trace_instr_o,
   output logic [4:0]  trace_rd_o,
   output logic [31:0] trace_wdata_o,
-  output logic [1:0]  trace_flag_o  // [0]=写 rd [1]=wdata 依赖 mcycle,差分跳过
+  output logic [1:0]  trace_flag_o
 );
 
   import amecpu_pkg::*;
   import amechip_pkg::*;
 
-  logic        stall;            // 流水停顿(EX 或 MEM 忙)
-  logic        pipe_advance;     // 本拍结束流水推进
-  logic        redirect;         // 本拍重定向取指(分支/jal/mret/中断)
+  logic        stall;
+  logic        pipe_advance;
+  logic        redirect;
   logic [31:0] redirect_target;
 
   wire         if_grant, if_rvalid, if_err;
@@ -65,25 +65,25 @@ module ame_cpu (
   logic [31:0] dm_addr, dm_wdata;
   logic [3:0]  dm_wstrb;
 
-  wire         ex_stall_loaduse; // load-use 互锁
-  wire         mul_can_start;    // 乘除发起(停等期间标记)
-  wire         mem_busy;         // MEM 级 load/store 未完成
-  wire         ex_nop_effect;    // 本条 EX 指令效果失效(非法/未对齐/CSR 非法)
-  wire         take_irq;         // 本拍采样到中断
+  wire         ex_stall_loaduse;
+  wire         mul_can_start;
+  wire         mem_busy;
+  wire         ex_nop_effect;
+  wire         take_irq;
   wire         csr_rlegal, csr_wro, csr_mie;
   logic [31:0] csr_rdata, csr_mtvec_base;
-  wire         ame_req_v;        // AME 请求 EX 级呈现(v0.3:打入请求寄存器才对外)
-  wire         ame_waiting;      // AME 请求未能装入请求寄存器 → EX 停等
-  logic        amreq_v_q;        // v0.3 请求寄存器(对引脚做 §6 握手)
+  wire         ame_req_v;
+  wire         ame_waiting;
+  logic        amreq_v_q;
   logic [31:0] amreq_instr_q, amreq_rs1_q, amreq_rs2_q;
 
-  wire [31:0] op_a_raw, op_b_raw; // EX 操作数(经全部旁路)
+  wire [31:0] op_a_raw, op_b_raw;
 
-  logic [31:0] pc_q;         // 下一个待发取指地址
-  logic [31:0] fetch_pc_q;   // 在途取指的地址(响应对应)
-  logic        fetch_infl_q; // 有一笔 IF 读在 AXI 上
+  logic [31:0] pc_q;
+  logic [31:0] fetch_pc_q;
+  logic        fetch_infl_q;
   logic        halt_q;
-  logic        drain_q;      // ebreak 进入 EX 后置位:封死取指与 ID→EX(粘滞)
+  logic        drain_q;
 
   logic        if_id_valid_q;
   logic [31:0] if_id_pc_q;
@@ -134,7 +134,7 @@ module ame_cpu (
     .ax_r_ready     (ax_r_ready)
   );
 
-  wire rdata_in = if_rvalid && !redirect && !drain_q && !fetch_poison_q; // 重定向/停机/毒化:过期回复作废
+  wire rdata_in = if_rvalid && !redirect && !drain_q && !fetch_poison_q;
   wire pipe_kill = redirect || drain_q;
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -302,7 +302,7 @@ module ame_cpu (
           else if (f_f3 == 3'd5) d_alu_op = ALU_SRA;
           else                   d_illegal = 1'b1;
         end else if (f_f7 == 7'h01) begin
-          d_is_muldiv = 1'b1; // funct3 由 EX 用 instr[14:12] 直传
+          d_is_muldiv = 1'b1;
         end else begin
           d_illegal = 1'b1;
         end
@@ -326,7 +326,7 @@ module ame_cpu (
           d_csr_addr = id_instr[31:20];
           d_rs1_en   = (f_f3 < 3'd5);
           d_rd_we    = 1'b1;
-          d_imm      = {27'h0, id_instr[19:15]}; // 立数形式的 zimm
+          d_imm      = {27'h0, id_instr[19:15]};
           d_csr_skip = (id_instr[31:20] == CSR_MCYCLE)  || (id_instr[31:20] == CSR_MCYCLEH) ||
                        (id_instr[31:20] == CSR_CYCLE)   || (id_instr[31:20] == CSR_CYCLEH);
         end else begin
@@ -335,8 +335,8 @@ module ame_cpu (
       end
       amechip_pkg::AME_OPCODE: begin
         d_is_ame = 1'b1;
-        d_rs1_en = 1'b1;  // req_rs1 = 旁路后的 GPR 值
-        d_rs2_en = 1'b1;  // req_rs2 同(当前未用,仍须正确驱动)
+        d_rs1_en = 1'b1;
+        d_rs2_en = 1'b1;
         if (f_f3 == amechip_pkg::AME_F3_CFG) begin
         end else begin
           case (f_f3)
@@ -358,7 +358,7 @@ module ame_cpu (
             default: d_illegal = 1'b1;
           endcase
         end
-        d_rd_we = d_ame_rd; // 仅 st.y/st.q 写 rd
+        d_rd_we = d_ame_rd;
       end
       default: d_illegal = 1'b1;
     endcase
@@ -433,7 +433,7 @@ module ame_cpu (
       idex_rs2_val     <= rf_rdata2;
       idex_mul_started <= 1'b0;
     end else if (mul_can_start) begin
-      idex_mul_started <= 1'b1;   // 停等期间标记已发起
+      idex_mul_started <= 1'b1;
     end
   end
 
@@ -474,7 +474,7 @@ module ame_cpu (
                      && !(idex_mul_started && muldiv_done);
 
   wire [11:0] csr_raddr = idex_is_csr ? idex_csr_addr : CSR_MEPC;
-  wire  [1:0] retire_pend = {1'b0, exmem_valid} + {1'b0, memwb_fresh_q}; // EX 读时在 MEM/WB 的更老指令
+  wire  [1:0] retire_pend = {1'b0, exmem_valid} + {1'b0, memwb_fresh_q};
   wire        csr_we_pulse = pipe_advance && idex_valid && idex_is_csr && !ex_nop_effect;
   wire [31:0] csr_wdata = idex_csr_f3[2] ? {27'h0, idex_imm[4:0]} : op_a_raw;
   wire        mret_commit = pipe_advance && idex_valid && idex_is_mret;
@@ -534,7 +534,7 @@ module ame_cpu (
   assign dm_req_valid = mem_is_load || mem_is_store;
   assign dm_we        = mem_is_store;
   assign dm_addr      = exmem_result;
-  assign dm_wdata     = exmem_store_data << (8 * dm_addr[1:0]);  // 字节道对齐
+  assign dm_wdata     = exmem_store_data << (8 * dm_addr[1:0]);
 
   always_comb begin
     case (exmem_ls_size[1:0])
@@ -604,7 +604,7 @@ module ame_cpu (
   end
 
   logic        memwb_valid;
-  logic        memwb_fresh_q;   // 本拍 memwb 为新装入的指令(只提交一次)
+  logic        memwb_fresh_q;
   logic [31:0] memwb_pc, memwb_instr, memwb_wdata;
   logic [4:0]  memwb_rd;
   logic        memwb_rd_we, memwb_flag_skip, memwb_is_ebreak, memwb_is_wfi;
@@ -614,7 +614,7 @@ module ame_cpu (
       memwb_valid   <= 1'b0;
       memwb_fresh_q <= 1'b0;
     end else begin
-      memwb_fresh_q <= 1'b0;   // 默认清零;仅新装入拍置位
+      memwb_fresh_q <= 1'b0;
       if (mem_load_leave) begin
       memwb_valid     <= 1'b1;
       memwb_pc        <= exmem_pc;
@@ -643,7 +643,7 @@ module ame_cpu (
       memwb_instr     <= exmem_instr;
       memwb_rd        <= exmem_rd;
       memwb_rd_we     <= exmem_rd_we;
-      memwb_wdata     <= ame_resp_data;   // st.y/st.q resp(1/2 拍统一在此捕获)
+      memwb_wdata     <= ame_resp_data;
       memwb_flag_skip <= exmem_flag_skip;
       memwb_is_ebreak <= exmem_is_ebreak;
       memwb_is_wfi    <= exmem_is_wfi;
@@ -680,7 +680,7 @@ module ame_cpu (
   wire ev_ill = pipe_advance && idex_valid && ex_nop_effect;
   wire bus_err_pulse = if_err || dm_err;
 
-  wire wb_fire = memwb_valid && memwb_fresh_q && !halt_q; // 新装入才提交(停等期间不重复)
+  wire wb_fire = memwb_valid && memwb_fresh_q && !halt_q;
   assign trace_valid_o = wb_fire;
   assign trace_pc_o    = memwb_pc;
   assign trace_instr_o = memwb_instr;
@@ -713,7 +713,7 @@ module ame_cpu (
     end else begin
       ame_resp_drain_q <= 2'd0;
       if (amreq_v_q && ame_req_ready)
-        ame_resp_drain_q <= ame_stq_acc ? 2'd3 : 2'd1;   // 接受沿:resp 在途
+        ame_resp_drain_q <= ame_stq_acc ? 2'd3 : 2'd1;
       else if (ame_resp_drain_busy)
         ame_resp_drain_q <= ame_resp_drain_q - 2'd1;
       if (amreq_ld) begin
@@ -722,7 +722,7 @@ module ame_cpu (
         amreq_rs1_q   <= op_a_raw;
         amreq_rs2_q   <= op_b_raw;
       end else if (amreq_v_q && ame_req_ready) begin
-        amreq_v_q <= 1'b0;              // 已接受且无新请求:撤销
+        amreq_v_q <= 1'b0;
       end
     end
   end

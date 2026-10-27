@@ -51,8 +51,8 @@ module dma_engine #(
 
   localparam int unsigned PW = $clog2(FIFO_DEPTH);
   localparam int unsigned RW = $clog2(FIFO_DEPTH + 1);
-  localparam logic [5:2]  OFF_CTRL = 4'h6;  // DMA_CTRL_OFF   字偏移
-  localparam logic [5:2]  OFF_STAT = 4'h7;  // DMA_STATUS_OFF 字偏移
+  localparam logic [5:2]  OFF_CTRL = 4'h6;
+  localparam logic [5:2]  OFF_STAT = 4'h7;
   /* verilator lint_off WIDTHTRUNC */
   localparam logic [RW-1:0]  DEPTH_W  = FIFO_DEPTH;
   localparam logic [RW+1:0]  DEPTH_W2 = FIFO_DEPTH;
@@ -153,7 +153,7 @@ module dma_engine #(
   assign rd_ar_addr_o  = rd_addr;
   wire rd_ar_acc = rd_ar_valid_o && rd_ar_ready_i;
 
-  assign rd_r_ready_o = 1'b1; // 始终接收(错误/丢弃时仅吞掉)
+  assign rd_r_ready_o = 1'b1;
   wire rd_r_acc = rd_r_valid_i && rd_r_ready_o;
 
   wire rd_bus_err = rd_r_acc && !discard_q && (rd_r_resp_i != amechip_pkg::AXI_OKAY);
@@ -284,7 +284,7 @@ module dma_engine #(
         else if (csr_w_accept && busy_q && (w_off == OFF_CTRL) && w_dat[1])
                            errcode_q <= amechip_pkg::DMA_ERR_ABORT;
         else               errcode_q <= amechip_pkg::DMA_ERR_BUS;
-        fifo_wp <= '0; fifo_rp <= '0; fifo_cnt <= '0; // 丢弃在途数据
+        fifo_wp <= '0; fifo_rp <= '0; fifo_cnt <= '0;
       end
 
       if (discard_q && drained) begin

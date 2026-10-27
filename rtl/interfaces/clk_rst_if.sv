@@ -4,10 +4,10 @@
 
 interface clk_rst_if;
 
-  logic clk;          // 唯一时钟(外部直入)
-  logic rst_ni;       // 原始复位输入(异步断言)
-  logic rst_n;        // 同步释放后的片内复位(全片分发)
-  logic rst_busy;     // 释放同步中(仅观测/断言用)
+  logic clk;
+  logic rst_ni;
+  logic rst_n;
+  logic rst_busy;
 
   logic [1:0] sync_ff;
   always_ff @(posedge clk or negedge rst_ni) begin

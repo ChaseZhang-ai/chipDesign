@@ -15,9 +15,9 @@ module stub_cpu (
   input  logic [31:0]        ame_resp_data,
   input  logic               ame_resp_err,
 
-  input  logic               irq_i,        // stub 不处理,仅观测
+  input  logic               irq_i,
   output logic               cpu_wfi_o,
-  output logic               buserr_evt_o  // 1 拍脉冲 → INTC bit8
+  output logic               buserr_evt_o
 );
 
   typedef enum logic [2:0] {
@@ -32,14 +32,14 @@ module stub_cpu (
   logic        wfi_q;
   logic [31:0] buserr_sticky;
 
-  logic [31:0] pc_next_q;                 // 顺序下一 PC(取指完成时保存)
+  logic [31:0] pc_next_q;
   logic [31:0] mem_addr_q, mem_wdata_q;
   logic [3:0]  mem_wstrb_q;
   logic [4:0]  mem_rd_q;
   logic        is_store_q;
-  logic [1:0]  mem_size_q;                // 0=byte 1=half 2=word(S_MEM 用)
+  logic [1:0]  mem_size_q;
   logic        mem_sign_q;
-  logic [31:0] ame_rd_q;                  // AME 写回目标;FFFF_FFFF=不写回
+  logic [31:0] ame_rd_q;
 
   assign cpu_wfi_o = (state == S_HALT) && wfi_q;
 
@@ -115,7 +115,7 @@ module stub_cpu (
       end
       7'b00000_11: begin // LOAD
         mem_acc_c = 1'b1;
-        wb_en_c   = 1'b1; wb_val_c = 32'd0;      // 数据在 S_MEM 捕获
+        wb_en_c   = 1'b1; wb_val_c = 32'd0;
         case (f3)
           3'd0: begin mem_size_c = 2'd0; mem_sign_c = 1'b1; end  // lb
           3'd1: begin mem_size_c = 2'd1; mem_sign_c = 1'b1; end  // lh
@@ -167,7 +167,7 @@ module stub_cpu (
       end
       7'b01100_11: begin // OP(R)
         wb_en_c = 1'b1;
-        if (f7 == 7'd1) begin // M 扩展
+        if (f7 == 7'd1) begin
           case (f3)
             3'd0: wb_val_c = rs1v * rs2v;
             3'd1: wb_val_c = mult_hi($signed(rs1v), $signed(rs2v));
@@ -197,7 +197,7 @@ module stub_cpu (
       end
       7'b11100_11: begin // SYSTEM
         if (f3 == 3'd0) is_sys_c = 1'b1;
-        else            illegal_c = 1'b1;             // Zicsr 不在 RV32IM 基础集
+        else            illegal_c = 1'b1;
       end
       7'b00010_11: begin // custom-0(opcode 0x0B)→ AME
         ame_acc_c = 1'b1;
@@ -352,7 +352,7 @@ module stub_cpu (
                                 ? load_data_c : 32'd0;
             end
             pc    <= pc_next_q;
-            state <= S_GAP;      // 主口约定:resp 后 1 空拍再发新请求(xbar RELEASE)
+            state <= S_GAP;
           end
         end
 
@@ -361,7 +361,7 @@ module stub_cpu (
         end
 
         S_AME_REQ: begin
-          if (ame_req_ready) begin          // valid&&ready 同拍 = 接受沿
+          if (ame_req_ready) begin
             ame_req_valid <= 1'b0;
             state         <= S_AME_RESP;
           end
@@ -377,7 +377,7 @@ module stub_cpu (
         end
 
         S_HALT: begin
-          ; // 真核应支持中断唤醒;stub 停在此处直至复位
+          ;
         end
 
         default: state <= S_IF;

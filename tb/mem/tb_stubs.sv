@@ -56,7 +56,7 @@ module tb_sys_stub (
     case (ra_q)
       3'h0: r_data_o = amechip_pkg::SYS_ID_VAL;  // ID "AMCC"
       3'h1: r_data_o = amechip_pkg::SYS_VER_VAL; // VERSION 1.0.0
-      3'h2: r_data_o = 32'h0;                    // STATUS(busy 位全 0)
+      3'h2: r_data_o = 32'h0;
       3'h4: r_data_o = scratch0_q;
       3'h5: r_data_o = scratch1_q;
       default: r_data_o = 32'h0;
@@ -164,7 +164,7 @@ module tb_uart_stub (
         case (aw_addr_i[4:2])
           3'h2: div_q  <= w_data_i;  // DIV
           3'h3: ctrl_q <= w_data_i;  // CTRL
-          default: ;                 // TXDATA 吞掉
+          default: ;
         endcase
       end else if (wr_busy && b_ready_i) wr_busy <= 1'b0;
       if (rd_acc) begin
@@ -209,7 +209,7 @@ module tb_ame_stub (
   assign ar_ready_o = !rd_busy && !wr_acc && !wr_busy;
   assign b_valid_o  = wr_busy;
   assign r_valid_o  = rd_busy;
-  assign b_resp_o   = amechip_pkg::AXI_OKAY;  // 区域内无未定义偏移
+  assign b_resp_o   = amechip_pkg::AXI_OKAY;
   assign r_resp_o   = amechip_pkg::AXI_OKAY;
 
   logic [31:0] wbuf [0:RAMW-1];
@@ -226,7 +226,7 @@ module tb_ame_stub (
       if (wr_acc) begin
         wa_q <= aw_addr_i[12:0]; wv_q <= w_data_i; wsb_q <= w_strb_i;
         wr_busy <= 1'b1;
-        if (aw_addr_i[12] == 1'b1) begin // WBUF(mod 1KB;基址含 bit12,见上)
+        if (aw_addr_i[12] == 1'b1) begin
           for (int k = 0; k < 4; k++) begin
             if (w_strb_i[k])
               wbuf[aw_addr_i[9:2]][8*k +: 8] <= w_data_i[8*k +: 8];
@@ -253,15 +253,15 @@ module tb_xmem_psram #(
   parameter int unsigned A_BITS = 23
 ) (
   input  logic              clk_i,
-  input  logic [A_BITS-1:0] a_i,     // 字节地址
-  input  logic [15:0]       di_i,    // 芯片 → 器件
-  output logic [15:0]       do_o,    // 器件 → 芯片(地址拍后一拍有效)
+  input  logic [A_BITS-1:0] a_i,
+  input  logic [15:0]       di_i,
+  output logic [15:0]       do_o,
   input  logic              ce_ni,
   input  logic              oe_ni,
   input  logic              we_ni,
-  input  logic              dump_req_i   // TB:单拍脉冲 → 转储 KV 区(调试/对拍)
+  input  logic              dump_req_i
 );
-  localparam int unsigned NW = 1 << (A_BITS - 1); // 半字数(8MB → 4M)
+  localparam int unsigned NW = 1 << (A_BITS - 1);
   logic [15:0] mem [0:NW-1];
   logic [15:0] do_q;
   logic [31:0] lcg_s;

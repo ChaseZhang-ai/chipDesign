@@ -3,8 +3,8 @@
 
 module tb_smoke_1;
 
-  localparam int    BIT_CYC = 13;    // 与 boot.s 的 DIV=13 一致
-  localparam real   CLKP    = 10.0;  // 100MHz 仿真时钟
+  localparam int    BIT_CYC = 13;
+  localparam real   CLKP    = 10.0;
   localparam int    NBYTES  = 12;
 
   logic       clk = 1'b0;
@@ -43,7 +43,7 @@ module tb_smoke_1;
         #(BIT_CYC * CLKP);
         b[i] = uart_tx;
       end
-      #(BIT_CYC * CLKP);          // 停止位
+      #(BIT_CYC * CLKP);
     end
   endtask
 

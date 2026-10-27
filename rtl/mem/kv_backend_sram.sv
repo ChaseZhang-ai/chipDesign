@@ -15,7 +15,7 @@ module kv_backend_sram #(
   input  logic [BANKS*BPAW-1:0] bp_addr_i,
   input  logic [BANKS*32-1:0]   bp_wdata_i,
   output logic [BANKS*32-1:0]   bp_rdata_o,
-  input  logic                  bp_layer_i, // 记录用,后端不区分层
+  input  logic                  bp_layer_i,
   input  logic                  bp_kvt_i,
   output logic                  bp_done_o,
   output logic                  bp_err_o,

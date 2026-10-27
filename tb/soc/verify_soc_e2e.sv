@@ -53,9 +53,9 @@ endmodule
 
 module verify_soc_e2e;
 
-  localparam int BIT_CYC = 13;             // UART DIV(与微内核一致)
-  localparam real CLKP = 10.0;             // 100 MHz(周期数口径与频率无关)
-  localparam int MAX_CYC = 40_000_000;     // 看门狗
+  localparam int BIT_CYC = 13;
+  localparam real CLKP = 10.0;
+  localparam int MAX_CYC = 40_000_000;
 
   logic clk = 1'b0;
   logic rst_ni = 1'b0;
@@ -182,7 +182,7 @@ module verify_soc_e2e;
       errs = errs + 1;
     end
 
-    repeat (2000) @(posedge clk);   // 让 UART TX FIFO 排空
+    repeat (2000) @(posedge clk);
 
     $display("\n[p3d_tb] ---- UART (%0d bytes) ----", nbytes);
     for (int i = 0; i < nbytes; i = i + 1) $write("%c", rx_all[i]);

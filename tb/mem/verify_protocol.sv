@@ -47,7 +47,7 @@ module verify_protocol #(
   input  logic [2*NS-1:0]   s_r_resp_i
 );
 
-  localparam int unsigned QD = 64; // 每主每方向 outstanding 记录深度
+  localparam int unsigned QD = 64;
 
   localparam int C_M_AW_ST = 0, C_M_W_ST = 1, C_M_AR_ST = 2,
                  C_S_AW_ST = 3, C_S_W_ST = 4, C_S_AR_ST = 5,
@@ -100,14 +100,14 @@ module verify_protocol #(
     if (a >= 32'h2000_1000 && a <= 32'h2000_2FFF)            return 6; // AME
     if (a >= 32'h2000_3000 && a <= 32'h2000_3FFF)            return 7; // KV
     if (a >= 32'h4000_0000 && a <= 32'h407F_FFFF)            return 8; // XMEM
-    return 32'hFFFF_FFFF;                                            // 保留
+    return 32'hFFFF_FFFF;
   endfunction
 
   function automatic logic [1:0] resp_expected(input bit is_wr, input logic [31:0] a);
     int unsigned s;
     s = slave_of(a);
     if (s == 32'hFFFF_FFFF) return amechip_pkg::AXI_DECERR;
-    if (is_wr && s == 1)     return amechip_pkg::AXI_SLVERR; // BOOT ROM 写
+    if (is_wr && s == 1)     return amechip_pkg::AXI_SLVERR;
     return amechip_pkg::AXI_OKAY;
   endfunction
 

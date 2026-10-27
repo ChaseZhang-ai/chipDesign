@@ -5,7 +5,7 @@ module tb_xbar;
 
   logic clk = 1'b0;
   logic rst_n;
-  always #5 clk = ~clk; // 100 MHz 仿真
+  always #5 clk = ~clk;
 
   logic        c_aw_valid, c_aw_ready;
   logic [31:0] c_aw_addr;
@@ -292,7 +292,7 @@ module tb_xbar;
       axi_read_check("OCSRAM@200", 32'h0000_0200, 32'h1111_1111);
       axi_read_check("OCSRAM@204", 32'h0000_0204, 32'h2222_2222);
       axi_read_check("INTC.PENDING[2]", 32'h1000_1004, 32'h4);
-      axi_write(32'h1000_1000, 32'hFFFF_FFFF); // EN 全开
+      axi_write(32'h1000_1000, 32'hFFFF_FFFF);
       bfm_check_eq("IRQ线", {31'b0, irq_line}, 32'b1);
       axi_write(32'h1000_1000, 32'h0);
       axi_write(32'h1000_1008, 32'h4); // CLEAR

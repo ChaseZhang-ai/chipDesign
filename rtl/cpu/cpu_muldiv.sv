@@ -10,7 +10,7 @@ module cpu_muldiv (
   input  logic [31:0] rs1_i,
   input  logic [31:0] rs2_i,
   output logic        busy_o,
-  output logic        idle_o,     // S_IDLE:start 可被接受
+  output logic        idle_o,
   output logic        done_o,
   output logic [31:0] result_o
 );
@@ -22,17 +22,17 @@ module cpu_muldiv (
   logic [5:0] cnt_q;
   logic [2:0] fn_q;
 
-  logic [31:0] mul_a_q;   // 乘数绝对值(不变)
-  logic [31:0] mul_b_q;   // 移位中的乘数低半部
-  logic [32:0] acc_q;     // 部分和高半部(含进位)
-  logic        mul_neg_q; // 64 位积取负
+  logic [31:0] mul_a_q;
+  logic [31:0] mul_b_q;
+  logic [32:0] acc_q;
+  logic        mul_neg_q;
 
-  logic [32:0] div_r_q;   // 余数
-  logic [31:0] div_x_q;   // 被除数移位窗(高位先出)
-  logic [31:0] div_q_q;   // 商累加
-  logic [31:0] div_s_q;   // 除数绝对值
-  logic        div_nq_q;  // 商取负
-  logic        div_nr_q;  // 余取负
+  logic [32:0] div_r_q;
+  logic [31:0] div_x_q;
+  logic [31:0] div_q_q;
+  logic [31:0] div_s_q;
+  logic        div_nq_q;
+  logic        div_nr_q;
 
   logic [31:0] result_q;
 
@@ -43,7 +43,7 @@ module cpu_muldiv (
       FN_MULH:   result_cmb = mul_fix[63:32];
       FN_MULHSU: result_cmb = mul_fix[63:32];
       FN_MULHU:  result_cmb = mul_prod[63:32];
-      default: begin // DIV/REM 族
+      default: begin
         if (is_rem_final(fn_q))
           result_cmb = div_nr_q ? (~{div_r_q[31:0]} + 32'd1) : div_r_q[31:0];
         else
@@ -65,8 +65,8 @@ module cpu_muldiv (
   wire div_signed = (fn_i == 3'd4) || (fn_i == 3'd6); // DIV / REM
   wire is_rem     = (fn_i == 3'd6) || (fn_i == 3'd7); // REM / REMU
 
-  logic        st_neg;   // 乘积/商取负
-  logic        st_rneg;  // 余数取负
+  logic        st_neg;
+  logic        st_rneg;
   logic [31:0] st_a, st_s;
 
   always_comb begin
@@ -77,9 +77,9 @@ module cpu_muldiv (
              : (fn_i == FN_MULHSU) ? rs1_i[31]
              : 1'b0;
       st_a = (fn_i == FN_MULH || fn_i == FN_MULHSU) ?
-             ((rs1_i[31]) ? (~rs1_i + 32'd1) : rs1_i) : rs1_i;  // MULH/MULHSU 取 |a|
+             ((rs1_i[31]) ? (~rs1_i + 32'd1) : rs1_i) : rs1_i;
       st_s = (fn_i == FN_MULH) ?
-             ((rs2_i[31]) ? (~rs2_i + 32'd1) : rs2_i) : rs2_i;  // 仅 MULH 取 |b|
+             ((rs2_i[31]) ? (~rs2_i + 32'd1) : rs2_i) : rs2_i;
     end else begin
       st_neg  = div_signed && (rs1_i[31] ^ rs2_i[31]);
       st_rneg = div_signed && rs1_i[31];
@@ -176,7 +176,7 @@ module cpu_muldiv (
         end
 
         S_DONE: begin
-          result_q <= result_cmb;   // 锁存,供 IDLE 期保持
+          result_q <= result_cmb;
           state_q  <= S_IDLE;
         end
 
